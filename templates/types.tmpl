@@ -1,0 +1,70 @@
+{{- /*gotype: github.com/johnrutherford/fluentfga.Model*/ -}}
+
+{{ define "types" }}
+{{ template "_header" . }}
+
+{{ range .Types }}
+// {{ .Type }} represents the "{{ .Name }}" type.
+type {{ .Type }} struct {
+    {{ .IDName }} {{ .IDType }}
+}
+
+func ({{ .Type }}) object() string { return "{{ .Name }}" }
+func ({{ abbr .Type }} {{ .Type }}) id() string { return fmt.Sprint({{ abbr .Type }}.{{ .IDName }}) }
+func ({{ abbr .Type }} {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", {{ abbr .Type }}.{{ .IDName }}) }
+
+// {{ .Type }}Type represents the "{{ .Name }}" type.
+type {{ .Type }}Type struct {
+    model *AuthorizationModel
+}
+
+// {{ .Type }} Relations
+
+{{ range .Relations }}
+{{ $relType := print .Object.Type .Type }}
+{{ $relUserType := index .UserTypes 0 }}
+
+{{ if gt (len .UserTypes) 1 }}
+{{ $relUserType = print .Object.Type .Type "RelationUser" }}
+// {{ $relUserType }} is the userset for the "{{ .Object.Name }}#{{ .Name }}" relation.
+// It is a union of the following types:
+{{- range .UserTypes }}
+//   - {{ . }}
+{{- end }}
+type {{ $relUserType }} interface {
+    Object
+    Relation
+    {{ camelCase $relUserType }}()
+}
+
+{{ range .UserTypes }}
+func ({{ . }}) {{ camelCase $relUserType }}() { }
+{{ end }}
+{{ end }}
+
+// {{ .Type }} represents the "{{ .Name }}" relation.
+func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
+    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{
+        model: {{ abbr .Object.Type }}.model,
+        rel: "{{ .Name }}",
+        obj: "{{ .Object.Name }}",
+    }
+}
+
+{{ $usersetType := print .Object.Type .Type "Userset" }}
+// {{ $usersetType }} is the userset for the "{{ .Object.Name }}#{{ .Name }}" relation.
+type {{ $usersetType }} struct {
+    {{ .Object.Type }}
+}
+
+func ({{ $usersetType }}) relation() string { return "{{ .Name }}" }
+func ({{ abbr .Name }} {{ $usersetType }}) String() string { return fmt.Sprint({{ abbr .Name }}.{{ .Object.Type }}.String(), "#{{ .Name }}") }
+
+func ({{ abbr .Object.Type }} {{ .Object.Type }}) {{ .Type }}() {{ $usersetType }} {
+    return {{ $usersetType }}{ {{ abbr .Object.Type }} }
+}
+{{ end }}
+
+{{ end }}
+
+{{- end }}

@@ -1,0 +1,75 @@
+{{- /*gotype: github.com/johnrutherford/fluentfga.Model*/ -}}
+
+{{ define "authorization_model" }}
+{{ template "_header" . }}
+
+func NewAuthorizationModel(client sdkclient.SdkClient) *AuthorizationModel {
+    return &AuthorizationModel{
+        client: client,
+    }
+}
+
+// AuthorizationModel represents the OpenFGA authorization model.
+type AuthorizationModel struct {
+    client sdkclient.SdkClient
+}
+
+{{ range .Types -}}
+// {{ .Type }} provides the interface for the "{{ .Name }}" type.
+func (m *AuthorizationModel) {{ .Type }}() {{ .Type }}Type { return {{ .Type }}Type{m} }
+{{ end }}
+
+func (m *AuthorizationModel) check(ctx context.Context, user Object, rel Relation, obj Object) (bool, error) {
+	res, err := m.client.Check(ctx).
+		Body(sdkclient.ClientCheckRequest{
+            User: user.String(),
+            Relation: rel.relation(),
+            Object: obj.String(),
+		}).
+        Execute()
+
+	if err != nil {
+		return false, err
+	}
+	return res.GetAllowed(), nil
+}
+
+func (m *AuthorizationModel) write(ctx context.Context, user Object, rel Relation, obj Object) error {
+	_, err := m.client.Write(ctx).
+		Body(sdkclient.ClientWriteRequest{
+			Writes: []sdkclient.ClientTupleKey{
+				{
+					User:     user.String(),
+					Relation: rel.relation(),
+					Object:   obj.String(),
+				},
+			},
+		}).
+        Execute()
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AuthorizationModel) delete(ctx context.Context, user Object, rel Relation, obj Object) error {
+	_, err := m.client.Write(ctx).
+		Body(sdkclient.ClientWriteRequest{
+			Deletes: []sdkclient.ClientTupleKeyWithoutCondition{
+				{
+					User:     user.String(),
+					Relation: rel.relation(),
+					Object:   obj.String(),
+				},
+			},
+		}).
+		Execute()
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+{{- end }}

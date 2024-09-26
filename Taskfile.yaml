@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  examples:
+    cmds:
+      - go run ./cmd/fluentfga generate ./examples/google_drive/individual_permissions/model.fga ./examples/google_drive/individual_permissions/
+      - go run ./cmd/fluentfga generate ./examples/google_drive/organization_permissions/model.fga ./examples/google_drive/organization_permissions/
