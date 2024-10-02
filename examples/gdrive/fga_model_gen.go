@@ -13,12 +13,19 @@ func NewAuthorizationModel(client sdkclient.SdkClient) *AuthorizationModel {
 	}
 }
 
+// AuthorizationModel represents the OpenFGA authorization model.
 type AuthorizationModel struct {
 	client sdkclient.SdkClient
 }
 
-func (m *AuthorizationModel) User() UserType         { return UserType{m} }
+// User provides access to the "user" type's relations.
+func (m *AuthorizationModel) User() UserType { return UserType{m} }
+
+// Document provides access to the "document" type's relations.
 func (m *AuthorizationModel) Document() DocumentType { return DocumentType{m} }
+
+// Domain provides access to the "domain" type's relations.
+func (m *AuthorizationModel) Domain() DomainType { return DomainType{m} }
 
 func (m *AuthorizationModel) check(ctx context.Context, user Object, rel Relation, obj Object) (bool, error) {
 	res, err := m.client.Check(ctx).

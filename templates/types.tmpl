@@ -3,66 +3,51 @@
 {{ define "types" }}
 {{ template "_header" . }}
 
-{{ range .Types }}
-// {{ .Type }} represents the "{{ .Name }}" type.
-type {{ .Type }} struct {
-    {{ .IDName }} {{ .IDType }}
+type Type interface {
+    typeName() string
 }
 
-func ({{ .Type }}) object() string { return "{{ .Name }}" }
-func ({{ abbr .Type }} {{ .Type }}) id() string { return fmt.Sprint({{ abbr .Type }}.{{ .IDName }}) }
-func ({{ abbr .Type }} {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", {{ abbr .Type }}.{{ .IDName }}) }
+{{ range .Types }}
 
-// {{ .Type }}Type represents the "{{ .Name }}" type.
+// {{ .Type }}Type represents the "{{ .Name }}" type and provides interfaces for its relations.
 type {{ .Type }}Type struct {
     model *AuthorizationModel
 }
 
-// {{ .Type }} Relations
+func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
 
 {{ range .Relations }}
 {{ $relType := print .Object.Type .Type }}
 {{ $relUserType := index .UserTypes 0 }}
+{{ if gt (len .UserTypes) 1 }}
+{{ $relUserType = print .Object.Type .Type "User" }}
+{{ end }}
+
+// {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
+func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
+    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{
+        model: {{ abbr .Object.Type }}.model,
+        typ: "{{ .Object.Name }}",
+        rel: "{{ .Name }}",
+    }
+}
 
 {{ if gt (len .UserTypes) 1 }}
-{{ $relUserType = print .Object.Type .Type "RelationUser" }}
-// {{ $relUserType }} is the userset for the "{{ .Object.Name }}#{{ .Name }}" relation.
+// {{ $relUserType }} represents the possible user types for the "{{ .Object.Name }}#{{ .Name }}" relation.
 // It is a union of the following types:
 {{- range .UserTypes }}
 //   - {{ . }}
 {{- end }}
 type {{ $relUserType }} interface {
     Object
-    Relation
     {{ camelCase $relUserType }}()
 }
 
-{{ range .UserTypes }}
+{{ range .UserTypes -}}
 func ({{ . }}) {{ camelCase $relUserType }}() { }
 {{ end }}
 {{ end }}
 
-// {{ .Type }} represents the "{{ .Name }}" relation.
-func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
-    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{
-        model: {{ abbr .Object.Type }}.model,
-        rel: "{{ .Name }}",
-        obj: "{{ .Object.Name }}",
-    }
-}
-
-{{ $usersetType := print .Object.Type .Type "Userset" }}
-// {{ $usersetType }} is the userset for the "{{ .Object.Name }}#{{ .Name }}" relation.
-type {{ $usersetType }} struct {
-    {{ .Object.Type }}
-}
-
-func ({{ $usersetType }}) relation() string { return "{{ .Name }}" }
-func ({{ abbr .Name }} {{ $usersetType }}) String() string { return fmt.Sprint({{ abbr .Name }}.{{ .Object.Type }}.String(), "#{{ .Name }}") }
-
-func ({{ abbr .Object.Type }} {{ .Object.Type }}) {{ .Type }}() {{ $usersetType }} {
-    return {{ $usersetType }}{ {{ abbr .Object.Type }} }
-}
 {{ end }}
 
 {{ end }}

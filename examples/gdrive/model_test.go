@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	fga "github.com/johnrutherford/fluentfga/examples/google_drive/individual_permissions"
+	fga "github.com/johnrutherford/fluentfga/examples/gdrive"
 	sdkclient "github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +23,7 @@ func NewClient() sdkclient.SdkClient {
 	return client
 }
 
-func Test(t *testing.T) {
+func Test_IndividualPermissions(t *testing.T) {
 	ctx := context.Background()
 	model := fga.NewAuthorizationModel(NewClient())
 
@@ -56,6 +56,43 @@ func Test(t *testing.T) {
 	allowed, err = model.Document().
 		Writer().
 		Check(ctx, anne, doc)
+	assert.True(t, allowed)
+	assert.NoError(t, err)
+}
+
+func Test_OrganizationPermissions(t *testing.T) {
+	ctx := context.Background()
+	model := fga.NewAuthorizationModel(NewClient())
+
+	anne := fga.User{UserID: "anne"}
+	beth := fga.User{UserID: "beth"}
+	charles := fga.User{UserID: "charles"}
+	domain := fga.Domain{DomainID: "xyz"}
+	doc := fga.Document{DocumentID: "2021-budget"}
+
+	err := model.Domain().
+		Member().
+		Write(ctx, anne, domain)
+	assert.NoError(t, err)
+
+	err = model.Domain().
+		Member().
+		Write(ctx, beth, domain)
+	assert.NoError(t, err)
+
+	err = model.Domain().
+		Member().
+		Write(ctx, charles, domain)
+	assert.NoError(t, err)
+
+	err = model.Document().
+		Viewer().
+		Write(ctx, domain.MemberUserset(), doc)
+	assert.NoError(t, err)
+
+	allowed, err := model.Document().
+		Viewer().
+		Check(ctx, charles, doc)
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 }

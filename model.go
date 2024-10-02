@@ -20,6 +20,9 @@ type TypeDefinition struct {
 	IDType string
 
 	Relations []*Relation
+
+	Usersets    []*Userset
+	HasWildcard bool
 }
 
 type Relation struct {
@@ -29,6 +32,13 @@ type Relation struct {
 	Object *TypeDefinition
 
 	UserTypes []string
+}
+
+type Userset struct {
+	Type     string
+	Relation string
+
+	Object *TypeDefinition
 }
 
 func NewModel(
@@ -46,10 +56,13 @@ func NewModel(
 
 	createRelations(model, config, typeMap)
 
-	return &Model{
+	m := &Model{
 		Package: config.Package,
 		Types:   types,
 	}
+	m.sort()
+
+	return m
 }
 
 func newTypeDefinition(
@@ -91,8 +104,21 @@ func createRelations(
 			userTypes := make([]string, 0, len(relMeta.DirectlyRelatedUserTypes))
 			for _, userType := range relMeta.DirectlyRelatedUserTypes {
 				ut := titleCase(userType.Type)
+				usType := typeMap[userType.Type]
+
 				if rel := userType.GetRelation(); rel != "" {
 					ut += titleCase(rel) + "Userset"
+					us := &Userset{
+						Type:     ut,
+						Relation: rel,
+						Object:   usType,
+					}
+					usType.Usersets = append(usType.Usersets, us)
+				}
+				if rel := userType.GetWildcard(); rel != nil {
+					ut += titleCase(rel.String()) + "Wildcard"
+
+					usType.HasWildcard = true
 				}
 
 				userTypes = append(userTypes, ut)
@@ -107,9 +133,21 @@ func createRelations(
 
 			td.Relations = append(td.Relations, rel)
 		}
+	}
+}
 
-		slices.SortFunc(td.Relations, func(a, b *Relation) int {
-			return cmp.Compare(a.Name, b.Name)
+func (m *Model) sort() {
+	for _, td := range m.Types {
+		// Sort and de-dupe usersets
+		slices.SortFunc(td.Usersets, func(a, b *Userset) int {
+			return cmp.Or(
+				cmp.Compare(a.Type, b.Type),
+				cmp.Compare(a.Relation, b.Relation),
+			)
+		})
+
+		td.Usersets = slices.CompactFunc(td.Usersets, func(a, b *Userset) bool {
+			return a.Type == b.Type && a.Relation == b.Relation
 		})
 	}
 }

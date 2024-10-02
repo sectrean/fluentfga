@@ -12,6 +12,16 @@ import (
 //go:embed templates/*.tmpl
 var templates embed.FS
 
+var fileTemplates = []struct {
+	Template string
+	FileName string
+}{
+	{"model", "fga_model_gen.go"},
+	{"types", "fga_types_gen.go"},
+	{"relations", "fga_relations_gen.go"},
+	{"objects", "fga_objects_gen.go"},
+}
+
 type Generator struct {
 	tmpl *template.Template
 }
@@ -29,17 +39,8 @@ func NewGenerator() (*Generator, error) {
 }
 
 func (g *Generator) Generate(model *Model, output WriteFS) error {
-	files := []struct {
-		Template string
-		Name     string
-	}{
-		{"types", "fga_types_gen.go"},
-		{"authorization_model", "fga_authorization_model_gen.go"},
-		{"relations", "fga_relations_gen.go"},
-	}
-
-	for _, file := range files {
-		err := g.renderTemplate(file.Template, model, output, file.Name)
+	for _, ft := range fileTemplates {
+		err := g.renderTemplate(ft.Template, model, output, ft.FileName)
 		if err != nil {
 			return err
 		}
@@ -56,7 +57,6 @@ func (g *Generator) renderTemplate(name string, data any, fs WriteFS, fileName s
 	}
 
 	generated := buf.Bytes()
-
 	formatted, err := imports.Process(fileName, generated, nil)
 	if err != nil {
 		fs.WriteFile(fileName+".dump", generated)

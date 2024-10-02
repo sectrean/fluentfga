@@ -1,6 +1,6 @@
 {{- /*gotype: github.com/johnrutherford/fluentfga.Model*/ -}}
 
-{{ define "authorization_model" }}
+{{ define "model" }}
 {{ template "_header" . }}
 
 func NewAuthorizationModel(client sdkclient.SdkClient) *AuthorizationModel {
@@ -15,7 +15,7 @@ type AuthorizationModel struct {
 }
 
 {{ range .Types -}}
-// {{ .Type }} provides the interface for the "{{ .Name }}" type.
+// {{ .Type }} provides access to the "{{ .Name }}" type's relations.
 func (m *AuthorizationModel) {{ .Type }}() {{ .Type }}Type { return {{ .Type }}Type{m} }
 {{ end }}
 

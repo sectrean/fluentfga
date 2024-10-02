@@ -1,0 +1,61 @@
+{{- /*gotype: github.com/johnrutherford/fluentfga.Model*/ -}}
+
+{{ define "objects" }}
+{{ template "_header" . }}
+
+type Object interface {
+    typeName() string
+    id() string
+    String() string
+}
+
+type Userset interface {
+    Object
+    Relation
+}
+
+{{ range .Types }}
+// {{ .Type }} represents an object of the "{{ .Name }}" type.
+type {{ .Type }} struct {
+    {{ .IDName }} {{ .IDType }}
+}
+
+func ({{ .Type }}) typeName() string { return "{{ .Name }}" }
+func ({{ abbr .Type }} {{ .Type }}) id() string { return fmt.Sprint({{ abbr .Type }}.{{ .IDName }}) }
+func ({{ abbr .Type }} {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", {{ abbr .Type }}.{{ .IDName }}) }
+
+{{ if .HasWildcard }}
+{{ $wildcardType := print .Type "Wildcard" }}
+// {{ $wildcardType }} represents public access: "{{ .Name }}:*".
+type {{ $wildcardType }} struct{}
+
+func ({{ $wildcardType }}) typeName() string { return "{{ .Name }}" }
+func ({{ $wildcardType }}) id() string { return "*" }
+func ({{ $wildcardType }}) String() string { return "{{ .Name }}:*" }
+
+func ({{ abbr .Type }} {{ .Type }}) Wildcard() {{ $wildcardType }} {
+    return {{ $wildcardType }}{}
+}
+
+{{ end }}
+
+{{ range .Usersets }}
+{{ $usersetType := print .Type }}
+// {{ $usersetType }} is the "{{ .Object.Name }}:{{ print "{" .Object.IDName "}" }}#{{ .Relation }}" userset.
+type {{ $usersetType }} struct {
+    {{ .Object.Type }}
+}
+
+func ({{ $usersetType }}) relation() string { return "{{ .Relation }}" }
+func (u {{ $usersetType }}) String() string { return fmt.Sprint("{{ .Object.Name }}:", u.id(), "#{{ .Relation }}") }
+
+// {{ .Object.Type }}Userset returns the "{{ .Object.Name }}:{{ print "{" .Object.IDName "}" }}#{{ .Relation }}" userset.
+func ({{ abbr .Object.Type }} {{ .Object.Type }}) {{ titleCase .Relation }}Userset() {{ $usersetType }} {
+    return {{ $usersetType }}{ {{ abbr .Object.Type }} }
+}
+
+{{ end }}
+
+{{ end }}
+
+{{ end }}

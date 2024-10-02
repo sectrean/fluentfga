@@ -1,31 +1,22 @@
+{{- /*gotype: github.com/johnrutherford/fluentfga.Model*/ -}}
+
 {{ define "relations" }}
 {{ template "_header" . }}
 
-type Object interface {
-    object() string
-    id() string
-    String() string
-}
-
 type Relation interface {
-    object() string
+    typeName() string
     relation() string
-}
-
-type Userset interface {
-    Object
-    Relation
 }
 
 type DirectRelation[U Object, O Object] struct {
     model *AuthorizationModel
 
+    typ string
     rel string
-    obj string
 }
 
+func (r DirectRelation[U, O]) typeName() string { return r.typ }
 func (r DirectRelation[U, O]) relation() string { return r.rel }
-func (r DirectRelation[U, O]) object() string { return r.obj }
 
 func (r DirectRelation[U, O]) Check(ctx context.Context, user U, object O) (bool, error) {
     return r.model.check(ctx, user, r, object)

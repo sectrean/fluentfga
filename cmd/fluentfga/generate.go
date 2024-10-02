@@ -17,7 +17,7 @@ func NewGenerateCommand() *cobra.Command {
 		Use:     "generate",
 		Short:   "Generate Code",
 		Long:    "Generate code from an OpenFGA authorization model",
-		Example: `fluentfga generate model.fga`,
+		Example: `fluentfga generate model.fga ./output`,
 		Args:    cobra.ExactArgs(2),
 		RunE:    run,
 	}
