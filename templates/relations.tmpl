@@ -18,7 +18,7 @@ type DirectRelation[U Object, O Object] struct {
 func (r DirectRelation[U, O]) typeName() string { return r.typ }
 func (r DirectRelation[U, O]) relation() string { return r.rel }
 
-func (r DirectRelation[U, O]) Check(ctx context.Context, user U, object O) (bool, error) {
+func (r DirectRelation[U, O]) Check(ctx context.Context, user Object, object O) (bool, error) {
     return r.model.check(ctx, user, r, object)
 }
 
@@ -28,6 +28,20 @@ func (r DirectRelation[U, O]) Write(ctx context.Context, user U, object O) error
 
 func (r DirectRelation[U, O]) Delete(ctx context.Context, user U, object O) error {
     return r.model.delete(ctx, user, r, object)
+}
+
+type IndirectRelation[O Object] struct {
+    model *AuthorizationModel
+
+    typ string
+    rel string
+}
+
+func (r IndirectRelation[O]) typeName() string { return r.typ }
+func (r IndirectRelation[O]) relation() string { return r.rel }
+
+func (r IndirectRelation[O]) Check(ctx context.Context, user Object, object O) (bool, error) {
+    return r.model.check(ctx, user, r, object)
 }
 
 {{ end }}

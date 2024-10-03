@@ -18,6 +18,18 @@ func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
 
 {{ range .Relations }}
 {{ $relType := print .Object.Type .Type }}
+
+{{ if eq (len .UserTypes) 0 }}
+// {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
+func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRelation[{{ .Object.Type }}] {
+    return IndirectRelation[{{ .Object.Type }}]{
+        model: {{ abbr .Object.Type }}.model,
+        typ: "{{ .Object.Name }}",
+        rel: "{{ .Name }}",
+    }
+}
+
+{{ else }}
 {{ $relUserType := index .UserTypes 0 }}
 {{ if gt (len .UserTypes) 1 }}
 {{ $relUserType = print .Object.Type .Type "User" }}
@@ -47,7 +59,7 @@ type {{ $relUserType }} interface {
 func ({{ . }}) {{ camelCase $relUserType }}() { }
 {{ end }}
 {{ end }}
-
+{{ end }}
 {{ end }}
 
 {{ end }}
