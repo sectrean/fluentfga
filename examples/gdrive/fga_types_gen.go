@@ -19,55 +19,13 @@ type DocumentType struct {
 
 func (DocumentType) typeName() string { return "document" }
 
-// Owner provides an interface for the "document#owner" relation.
-func (d DocumentType) Owner() DirectRelation[DocumentOwnerUser, Document] {
-	return DirectRelation[DocumentOwnerUser, Document]{
-		model: d.model,
-		typ:   "document",
-		rel:   "owner",
-	}
-}
-
-// DocumentOwnerUser represents the possible user types for the "document#owner" relation.
-// It is a union of the following types:
-//   - User
-//   - DomainMemberUserset
-type DocumentOwnerUser interface {
-	Object
-	documentOwnerUser()
-}
-
-func (User) documentOwnerUser()                {}
-func (DomainMemberUserset) documentOwnerUser() {}
-
-// Writer provides an interface for the "document#writer" relation.
-func (d DocumentType) Writer() DirectRelation[DocumentWriterUser, Document] {
-	return DirectRelation[DocumentWriterUser, Document]{
-		model: d.model,
-		typ:   "document",
-		rel:   "writer",
-	}
-}
-
-// DocumentWriterUser represents the possible user types for the "document#writer" relation.
-// It is a union of the following types:
-//   - User
-//   - DomainMemberUserset
-type DocumentWriterUser interface {
-	Object
-	documentWriterUser()
-}
-
-func (User) documentWriterUser()                {}
-func (DomainMemberUserset) documentWriterUser() {}
-
 // Commenter provides an interface for the "document#commenter" relation.
 func (d DocumentType) Commenter() DirectRelation[DocumentCommenterUser, Document] {
-	return DirectRelation[DocumentCommenterUser, Document]{
+	return DirectRelation[DocumentCommenterUser, Document]{IndirectRelation[Document]{
 		model: d.model,
 		typ:   "document",
 		rel:   "commenter",
-	}
+	}}
 }
 
 // DocumentCommenterUser represents the possible user types for the "document#commenter" relation.
@@ -82,13 +40,43 @@ type DocumentCommenterUser interface {
 func (User) documentCommenterUser()                {}
 func (DomainMemberUserset) documentCommenterUser() {}
 
+// Owner provides an interface for the "document#owner" relation.
+func (d DocumentType) Owner() DirectRelation[DocumentOwnerUser, Document] {
+	return DirectRelation[DocumentOwnerUser, Document]{IndirectRelation[Document]{
+		model: d.model,
+		typ:   "document",
+		rel:   "owner",
+	}}
+}
+
+// DocumentOwnerUser represents the possible user types for the "document#owner" relation.
+// It is a union of the following types:
+//   - User
+//   - DomainMemberUserset
+type DocumentOwnerUser interface {
+	Object
+	documentOwnerUser()
+}
+
+func (User) documentOwnerUser()                {}
+func (DomainMemberUserset) documentOwnerUser() {}
+
+// Parent provides an interface for the "document#parent" relation.
+func (d DocumentType) Parent() DirectRelation[Document, Document] {
+	return DirectRelation[Document, Document]{IndirectRelation[Document]{
+		model: d.model,
+		typ:   "document",
+		rel:   "parent",
+	}}
+}
+
 // Viewer provides an interface for the "document#viewer" relation.
 func (d DocumentType) Viewer() DirectRelation[DocumentViewerUser, Document] {
-	return DirectRelation[DocumentViewerUser, Document]{
+	return DirectRelation[DocumentViewerUser, Document]{IndirectRelation[Document]{
 		model: d.model,
 		typ:   "document",
 		rel:   "viewer",
-	}
+	}}
 }
 
 // DocumentViewerUser represents the possible user types for the "document#viewer" relation.
@@ -105,14 +93,26 @@ func (User) documentViewerUser()                {}
 func (UserWildcard) documentViewerUser()        {}
 func (DomainMemberUserset) documentViewerUser() {}
 
-// Parent provides an interface for the "document#parent" relation.
-func (d DocumentType) Parent() DirectRelation[Document, Document] {
-	return DirectRelation[Document, Document]{
+// Writer provides an interface for the "document#writer" relation.
+func (d DocumentType) Writer() DirectRelation[DocumentWriterUser, Document] {
+	return DirectRelation[DocumentWriterUser, Document]{IndirectRelation[Document]{
 		model: d.model,
 		typ:   "document",
-		rel:   "parent",
-	}
+		rel:   "writer",
+	}}
 }
+
+// DocumentWriterUser represents the possible user types for the "document#writer" relation.
+// It is a union of the following types:
+//   - User
+//   - DomainMemberUserset
+type DocumentWriterUser interface {
+	Object
+	documentWriterUser()
+}
+
+func (User) documentWriterUser()                {}
+func (DomainMemberUserset) documentWriterUser() {}
 
 // DomainType represents the "domain" type and provides interfaces for its relations.
 type DomainType struct {
@@ -123,9 +123,9 @@ func (DomainType) typeName() string { return "domain" }
 
 // Member provides an interface for the "domain#member" relation.
 func (d DomainType) Member() DirectRelation[User, Domain] {
-	return DirectRelation[User, Domain]{
+	return DirectRelation[User, Domain]{IndirectRelation[Domain]{
 		model: d.model,
 		typ:   "domain",
 		rel:   "member",
-	}
+	}}
 }

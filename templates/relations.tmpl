@@ -8,28 +8,6 @@ type Relation interface {
     relation() string
 }
 
-type DirectRelation[U Object, O Object] struct {
-    model *AuthorizationModel
-
-    typ string
-    rel string
-}
-
-func (r DirectRelation[U, O]) typeName() string { return r.typ }
-func (r DirectRelation[U, O]) relation() string { return r.rel }
-
-func (r DirectRelation[U, O]) Check(ctx context.Context, user Object, object O) (bool, error) {
-    return r.model.check(ctx, user, r, object)
-}
-
-func (r DirectRelation[U, O]) Write(ctx context.Context, user U, object O) error {
-    return r.model.write(ctx, user, r, object)
-}
-
-func (r DirectRelation[U, O]) Delete(ctx context.Context, user U, object O) error {
-    return r.model.delete(ctx, user, r, object)
-}
-
 type IndirectRelation[O Object] struct {
     model *AuthorizationModel
 
@@ -42,6 +20,27 @@ func (r IndirectRelation[O]) relation() string { return r.rel }
 
 func (r IndirectRelation[O]) Check(ctx context.Context, user Object, object O) (bool, error) {
     return r.model.check(ctx, user, r, object)
+}
+
+func (r IndirectRelation[O]) ListObjects(ctx context.Context, user Object) ([]O, error) {
+    data, err := r.model.listObjects(ctx, user, r)
+    if err != nil {
+        return nil, err
+    }
+
+    return newObjects[O](data)
+}
+
+type DirectRelation[U Object, O Object] struct {
+    IndirectRelation[O]
+}
+
+func (r DirectRelation[U, O]) Write(ctx context.Context, user U, object O) error {
+    return r.model.write(ctx, user, r, object)
+}
+
+func (r DirectRelation[U, O]) Delete(ctx context.Context, user U, object O) error {
+    return r.model.delete(ctx, user, r, object)
 }
 
 {{ end }}

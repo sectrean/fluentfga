@@ -42,6 +42,20 @@ func (m *AuthorizationModel) check(ctx context.Context, user Object, rel Relatio
 	return res.GetAllowed(), nil
 }
 
+func (m *AuthorizationModel) listObjects(ctx context.Context, user Object, rel Relation) ([]string, error) {
+	data, err := m.client.ListObjects(ctx).
+		Body(sdkclient.ClientListObjectsRequest{
+			User:     user.String(),
+			Relation: rel.relation(),
+		}).
+		Execute()
+
+	if err != nil {
+		return nil, err
+	}
+	return data.Objects, nil
+}
+
 func (m *AuthorizationModel) write(ctx context.Context, user Object, rel Relation, obj Object) error {
 	_, err := m.client.Write(ctx).
 		Body(sdkclient.ClientWriteRequest{

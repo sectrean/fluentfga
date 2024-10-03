@@ -149,5 +149,10 @@ func (m *Model) sort() {
 		td.Usersets = slices.CompactFunc(td.Usersets, func(a, b *Userset) bool {
 			return a.Type == b.Type && a.Relation == b.Relation
 		})
+
+		// Sort relations
+		slices.SortFunc(td.Relations, func(a, b *Relation) int {
+			return cmp.Compare(a.Name, b.Name)
+		})
 	}
 }

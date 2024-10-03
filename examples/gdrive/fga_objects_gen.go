@@ -3,6 +3,7 @@ package fga
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Object interface {
@@ -31,10 +32,6 @@ type UserWildcard struct{}
 func (UserWildcard) typeName() string { return "user" }
 func (UserWildcard) id() string       { return "*" }
 func (UserWildcard) String() string   { return "user:*" }
-
-func (u User) Wildcard() UserWildcard {
-	return UserWildcard{}
-}
 
 // Document represents an object of the "document" type.
 type Document struct {
@@ -66,3 +63,47 @@ func (u DomainMemberUserset) String() string { return fmt.Sprint("domain:", u.id
 func (d Domain) MemberUserset() DomainMemberUserset {
 	return DomainMemberUserset{d}
 }
+
+func newObjects[O Object](objs []string) ([]O, error) {
+	objects := make([]O, len(objs))
+
+	for i, s := range objs {
+		parts := strings.Split(s, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid object: %q", s)
+		}
+
+		var obj Object
+		switch parts[0] {
+		case "user":
+			obj = User{UserID: parts[1]}
+		case "document":
+			obj = Document{DocumentID: parts[1]}
+		case "domain":
+			obj = Domain{DomainID: parts[1]}
+		default:
+			obj = unknownObject{parts[0], parts[1]}
+		}
+
+		o, ok := obj.(O)
+		if !ok {
+			// TODO: Use multierror to collect all errors.
+			return nil, fmt.Errorf("unexpected object type: %q", s)
+		}
+
+		objects[i] = o
+	}
+	return objects, nil
+}
+
+// unknownObject represents an object of an unknown type.
+//
+// If the authorization model version used by OpenFGA is different from the one this code was generated for,
+// it's possible that the server will return objects that are not known to this code.
+type unknownObject struct {
+	objType, objID string
+}
+
+func (o unknownObject) typeName() string { return o.objType }
+func (o unknownObject) id() string       { return o.objID }
+func (o unknownObject) String() string   { return fmt.Sprint(o.objType, ":", o.objID) }

@@ -37,11 +37,11 @@ func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRela
 
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
 func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
-    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{
+    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{IndirectRelation[{{ .Object.Type }}]{
         model: {{ abbr .Object.Type }}.model,
         typ: "{{ .Object.Name }}",
         rel: "{{ .Name }}",
-    }
+    }}
 }
 
 {{ if gt (len .UserTypes) 1 }}

@@ -19,13 +19,22 @@ type DeviceType struct {
 
 func (DeviceType) typeName() string { return "device" }
 
+// DeviceRenamer provides an interface for the "device#device_renamer" relation.
+func (d DeviceType) DeviceRenamer() IndirectRelation[Device] {
+	return IndirectRelation[Device]{
+		model: d.model,
+		typ:   "device",
+		rel:   "device_renamer",
+	}
+}
+
 // ItAdmin provides an interface for the "device#it_admin" relation.
 func (d DeviceType) ItAdmin() DirectRelation[DeviceItAdminUser, Device] {
-	return DirectRelation[DeviceItAdminUser, Device]{
+	return DirectRelation[DeviceItAdminUser, Device]{IndirectRelation[Device]{
 		model: d.model,
 		typ:   "device",
 		rel:   "it_admin",
-	}
+	}}
 }
 
 // DeviceItAdminUser represents the possible user types for the "device#it_admin" relation.
@@ -39,27 +48,6 @@ type DeviceItAdminUser interface {
 
 func (User) deviceItAdminUser()                      {}
 func (DeviceGroupItAdminUserset) deviceItAdminUser() {}
-
-// SecurityGuard provides an interface for the "device#security_guard" relation.
-func (d DeviceType) SecurityGuard() DirectRelation[DeviceSecurityGuardUser, Device] {
-	return DirectRelation[DeviceSecurityGuardUser, Device]{
-		model: d.model,
-		typ:   "device",
-		rel:   "security_guard",
-	}
-}
-
-// DeviceSecurityGuardUser represents the possible user types for the "device#security_guard" relation.
-// It is a union of the following types:
-//   - User
-//   - DeviceGroupSecurityGuardUserset
-type DeviceSecurityGuardUser interface {
-	Object
-	deviceSecurityGuardUser()
-}
-
-func (User) deviceSecurityGuardUser()                            {}
-func (DeviceGroupSecurityGuardUserset) deviceSecurityGuardUser() {}
 
 // LiveVideoViewer provides an interface for the "device#live_video_viewer" relation.
 func (d DeviceType) LiveVideoViewer() IndirectRelation[Device] {
@@ -79,14 +67,26 @@ func (d DeviceType) RecordedVideoViewer() IndirectRelation[Device] {
 	}
 }
 
-// DeviceRenamer provides an interface for the "device#device_renamer" relation.
-func (d DeviceType) DeviceRenamer() IndirectRelation[Device] {
-	return IndirectRelation[Device]{
+// SecurityGuard provides an interface for the "device#security_guard" relation.
+func (d DeviceType) SecurityGuard() DirectRelation[DeviceSecurityGuardUser, Device] {
+	return DirectRelation[DeviceSecurityGuardUser, Device]{IndirectRelation[Device]{
 		model: d.model,
 		typ:   "device",
-		rel:   "device_renamer",
-	}
+		rel:   "security_guard",
+	}}
 }
+
+// DeviceSecurityGuardUser represents the possible user types for the "device#security_guard" relation.
+// It is a union of the following types:
+//   - User
+//   - DeviceGroupSecurityGuardUserset
+type DeviceSecurityGuardUser interface {
+	Object
+	deviceSecurityGuardUser()
+}
+
+func (User) deviceSecurityGuardUser()                            {}
+func (DeviceGroupSecurityGuardUserset) deviceSecurityGuardUser() {}
 
 // DeviceGroupType represents the "device_group" type and provides interfaces for its relations.
 type DeviceGroupType struct {
@@ -95,20 +95,20 @@ type DeviceGroupType struct {
 
 func (DeviceGroupType) typeName() string { return "device_group" }
 
-// SecurityGuard provides an interface for the "device_group#security_guard" relation.
-func (d DeviceGroupType) SecurityGuard() DirectRelation[User, DeviceGroup] {
-	return DirectRelation[User, DeviceGroup]{
-		model: d.model,
-		typ:   "device_group",
-		rel:   "security_guard",
-	}
-}
-
 // ItAdmin provides an interface for the "device_group#it_admin" relation.
 func (d DeviceGroupType) ItAdmin() DirectRelation[User, DeviceGroup] {
-	return DirectRelation[User, DeviceGroup]{
+	return DirectRelation[User, DeviceGroup]{IndirectRelation[DeviceGroup]{
 		model: d.model,
 		typ:   "device_group",
 		rel:   "it_admin",
-	}
+	}}
+}
+
+// SecurityGuard provides an interface for the "device_group#security_guard" relation.
+func (d DeviceGroupType) SecurityGuard() DirectRelation[User, DeviceGroup] {
+	return DirectRelation[User, DeviceGroup]{IndirectRelation[DeviceGroup]{
+		model: d.model,
+		typ:   "device_group",
+		rel:   "security_guard",
+	}}
 }
