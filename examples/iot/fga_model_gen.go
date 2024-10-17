@@ -3,7 +3,9 @@ package fga
 
 import (
 	"context"
+	"fmt"
 
+	sdk "github.com/openfga/go-sdk"
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
@@ -54,6 +56,23 @@ func (m *AuthorizationModel) listObjects(ctx context.Context, user Object, rel R
 		return nil, err
 	}
 	return data.Objects, nil
+}
+
+func (m *AuthorizationModel) listUsers(ctx context.Context, obj Object, rel Relation) ([]sdk.User, error) {
+	data, err := m.client.ListUsers(ctx).
+		Body(sdkclient.ClientListUsersRequest{
+			Object: sdk.FgaObject{
+				Type: obj.typeName(),
+				Id:   fmt.Sprint(obj.id()),
+			},
+			Relation: rel.relation(),
+		}).
+		Execute()
+
+	if err != nil {
+		return nil, err
+	}
+	return data.Users, nil
 }
 
 func (m *AuthorizationModel) write(ctx context.Context, user Object, rel Relation, obj Object) error {

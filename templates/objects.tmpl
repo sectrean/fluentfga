@@ -57,25 +57,16 @@ func ({{ abbr .Object.Type }} {{ .Object.Type }}) {{ titleCase .Relation }}Users
 func newObjects[O Object](objs []string) ([]O, error) {
     objects := make([]O, len(objs))
 
+    // TODO: Use multierror to collect all errors.
     for i, s := range objs {
         parts := strings.Split(s, ":")
         if len(parts) != 2 {
             return nil, fmt.Errorf("invalid object: %q", s)
         }
 
-        var obj Object
-        switch parts[0] {
-{{- range .Types }}
-        case "{{ .Name }}":
-            obj = {{ .Type }}{ {{ .IDName }}: parts[1] }
-{{- end }}
-        default:
-            obj = unknownObject{parts[0], parts[1]}
-        }
-
+        obj := newObject(parts[0], parts[1])
         o, ok := obj.(O)
         if !ok {
-            // TODO: Use multierror to collect all errors.
             return nil, fmt.Errorf("unexpected object type: %q", s)
         }
 
@@ -84,6 +75,52 @@ func newObjects[O Object](objs []string) ([]O, error) {
     return objects, nil
 }
 
+func newObject(typ, id string) Object {
+    switch typ {
+{{- range .Types }}
+    case "{{ .Name }}":
+        return {{ .Type }}{ {{ .IDName }}: id }
+{{- end }}
+
+    default:
+        return unknownObject{typ, id}
+    }
+}
+
+func newUsers(data []sdk.User) []Object {
+    users := make([]Object, len(data))
+
+    for i, u := range data {
+        users[i] = newUser(u)
+    }
+    return users
+}
+
+func newUser(u sdk.User) Object {
+    if u.Object != nil {
+        return newObject(u.Object.Type, u.Object.Id)
+    }
+    if u.Userset != nil {
+        return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation)
+    }
+    if u.Wildcard != nil {
+        return newObject(u.Wildcard.Type, "*")
+    }
+
+    panic("unknown user type")
+}
+
+func newUserset(typ, id, rel string) Userset {
+{{- range .Types }}
+{{- range .Usersets }}
+    if typ == "{{ .Object.Name }}" && rel == "{{ .Relation }}" {
+        return {{ .Type }}{ {{ .Object.Type }} { {{ .Object.IDName }}: id } }
+    }
+{{- end }}
+{{- end }}
+
+    panic("unknown userset type")
+}
 
 // unknownObject represents an object of an unknown type.
 //

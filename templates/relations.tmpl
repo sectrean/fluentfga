@@ -31,6 +31,15 @@ func (r IndirectRelation[O]) ListObjects(ctx context.Context, user Object) ([]O,
     return newObjects[O](data)
 }
 
+func (r IndirectRelation[O]) ListUsers(ctx context.Context, object O) ([]Object, error) {
+    data, err := r.model.listUsers(ctx, object, r)
+    if err != nil {
+        return nil, err
+    }
+
+    return newUsers(data), nil
+}
+
 type DirectRelation[U Object, O Object] struct {
     IndirectRelation[O]
 }

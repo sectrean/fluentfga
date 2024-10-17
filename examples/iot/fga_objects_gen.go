@@ -4,6 +4,8 @@ package fga
 import (
 	"fmt"
 	"strings"
+
+	sdk "github.com/openfga/go-sdk"
 )
 
 type Object interface {
@@ -77,33 +79,70 @@ func (d DeviceGroup) SecurityGuardUserset() DeviceGroupSecurityGuardUserset {
 func newObjects[O Object](objs []string) ([]O, error) {
 	objects := make([]O, len(objs))
 
+	// TODO: Use multierror to collect all errors.
 	for i, s := range objs {
 		parts := strings.Split(s, ":")
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid object: %q", s)
 		}
 
-		var obj Object
-		switch parts[0] {
-		case "user":
-			obj = User{UserID: parts[1]}
-		case "device":
-			obj = Device{DeviceID: parts[1]}
-		case "device_group":
-			obj = DeviceGroup{DeviceGroupID: parts[1]}
-		default:
-			obj = unknownObject{parts[0], parts[1]}
-		}
-
+		obj := newObject(parts[0], parts[1])
 		o, ok := obj.(O)
 		if !ok {
-			// TODO: Use multierror to collect all errors.
 			return nil, fmt.Errorf("unexpected object type: %q", s)
 		}
 
 		objects[i] = o
 	}
 	return objects, nil
+}
+
+func newObject(typ, id string) Object {
+	switch typ {
+	case "user":
+		return User{UserID: id}
+	case "device":
+		return Device{DeviceID: id}
+	case "device_group":
+		return DeviceGroup{DeviceGroupID: id}
+
+	default:
+		return unknownObject{typ, id}
+	}
+}
+
+func newUsers(data []sdk.User) []Object {
+	users := make([]Object, len(data))
+
+	for i, u := range data {
+		users[i] = newUser(u)
+	}
+	return users
+}
+
+func newUser(u sdk.User) Object {
+	if u.Object != nil {
+		return newObject(u.Object.Type, u.Object.Id)
+	}
+	if u.Userset != nil {
+		return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation)
+	}
+	if u.Wildcard != nil {
+		return newObject(u.Wildcard.Type, "*")
+	}
+
+	panic("unknown user type")
+}
+
+func newUserset(typ, id, rel string) Userset {
+	if typ == "device_group" && rel == "it_admin" {
+		return DeviceGroupItAdminUserset{DeviceGroup{DeviceGroupID: id}}
+	}
+	if typ == "device_group" && rel == "security_guard" {
+		return DeviceGroupSecurityGuardUserset{DeviceGroup{DeviceGroupID: id}}
+	}
+
+	panic("unknown userset type")
 }
 
 // unknownObject represents an object of an unknown type.
