@@ -11,7 +11,7 @@ type Type interface {
 
 // {{ .Type }}Type represents the "{{ .Name }}" type and provides interfaces for its relations.
 type {{ .Type }}Type struct {
-    model *AuthorizationModel
+    client sdkclient.SdkClient
 }
 
 func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
@@ -23,7 +23,7 @@ func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
 func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRelation[{{ .Object.Type }}] {
     return IndirectRelation[{{ .Object.Type }}]{
-        model: {{ abbr .Object.Type }}.model,
+        client: {{ abbr .Object.Type }}.client,
         typ: "{{ .Object.Name }}",
         rel: "{{ .Name }}",
     }
@@ -38,7 +38,7 @@ func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRela
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
 func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
     return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{IndirectRelation[{{ .Object.Type }}]{
-        model: {{ abbr .Object.Type }}.model,
+        client: {{ abbr .Object.Type }}.client,
         typ: "{{ .Object.Name }}",
         rel: "{{ .Name }}",
     }}

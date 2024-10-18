@@ -2,10 +2,12 @@
 package fga
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	sdk "github.com/openfga/go-sdk"
+	sdkclient "github.com/openfga/go-sdk/client"
 )
 
 type Object interface {
@@ -17,6 +19,10 @@ type Object interface {
 type Userset interface {
 	Object
 	Relation
+}
+
+type ContextualTuple interface {
+	tuple() sdkclient.ClientTupleKey
 }
 
 // User represents an object of the "user" type.
@@ -76,25 +82,37 @@ func (d DeviceGroup) SecurityGuardUserset() DeviceGroupSecurityGuardUserset {
 	return DeviceGroupSecurityGuardUserset{d}
 }
 
-func newObjects[O Object](objs []string) ([]O, error) {
-	objects := make([]O, len(objs))
-
-	// TODO: Use multierror to collect all errors.
-	for i, s := range objs {
-		parts := strings.Split(s, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid object: %q", s)
-		}
-
-		obj := newObject(parts[0], parts[1])
-		o, ok := obj.(O)
-		if !ok {
-			return nil, fmt.Errorf("unexpected object type: %q", s)
-		}
-
-		objects[i] = o
+func parseObject[O Object](s string) (o O, _ error) {
+	parts := strings.Split(s, ":")
+	if len(parts) != 2 {
+		return o, fmt.Errorf("invalid object: %q", s)
 	}
-	return objects, nil
+
+	object := newObject(parts[0], parts[1])
+
+	o, ok := object.(O)
+	if !ok {
+		return o, fmt.Errorf("unexpected object type: %q", s)
+	}
+
+	return o, nil
+}
+
+func newObjects[O Object](objs []string) ([]O, error) {
+	objects := make([]O, 0, len(objs))
+	var errs []error
+
+	for _, s := range objs {
+		obj, err := parseObject[O](s)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+
+		objects = append(objects, obj)
+	}
+
+	return objects, errors.Join(errs...)
 }
 
 func newObject(typ, id string) Object {
@@ -111,27 +129,35 @@ func newObject(typ, id string) Object {
 	}
 }
 
-func newUsers(data []sdk.User) []Object {
-	users := make([]Object, len(data))
+func newUsers(data []sdk.User) ([]Object, error) {
+	users := make([]Object, 0, len(data))
+	var errs []error
 
-	for i, u := range data {
-		users[i] = newUser(u)
+	for _, u := range data {
+		user, err := newUser(u)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+
+		users = append(users, user)
 	}
-	return users
+
+	return users, errors.Join(errs...)
 }
 
-func newUser(u sdk.User) Object {
+func newUser(u sdk.User) (Object, error) {
 	if u.Object != nil {
-		return newObject(u.Object.Type, u.Object.Id)
+		return newObject(u.Object.Type, u.Object.Id), nil
 	}
 	if u.Userset != nil {
-		return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation)
+		return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation), nil
 	}
 	if u.Wildcard != nil {
-		return newObject(u.Wildcard.Type, "*")
+		return newObject(u.Wildcard.Type, "*"), nil
 	}
 
-	panic("unknown user type")
+	return nil, fmt.Errorf("unknown user type %v", u)
 }
 
 func newUserset(typ, id, rel string) Userset {
@@ -142,7 +168,7 @@ func newUserset(typ, id, rel string) Userset {
 		return DeviceGroupSecurityGuardUserset{DeviceGroup{DeviceGroupID: id}}
 	}
 
-	panic("unknown userset type")
+	return unknownUserset{typ, id, rel}
 }
 
 // unknownObject represents an object of an unknown type.
@@ -156,3 +182,12 @@ type unknownObject struct {
 func (o unknownObject) typeName() string { return o.objType }
 func (o unknownObject) id() string       { return o.objID }
 func (o unknownObject) String() string   { return fmt.Sprint(o.objType, ":", o.objID) }
+
+type unknownUserset struct {
+	objType, objID, rel string
+}
+
+func (u unknownUserset) typeName() string { return u.objType }
+func (u unknownUserset) id() string       { return u.objID }
+func (u unknownUserset) relation() string { return u.rel }
+func (u unknownUserset) String() string   { return fmt.Sprint(u.objType, ":", u.objID, '#', u.rel) }

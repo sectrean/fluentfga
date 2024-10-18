@@ -20,6 +20,7 @@ var fileTemplates = []struct {
 	{"types", "fga_types_gen.go"},
 	{"relations", "fga_relations_gen.go"},
 	{"objects", "fga_objects_gen.go"},
+	{"options", "fga_options_gen.go"},
 }
 
 type Generator struct {

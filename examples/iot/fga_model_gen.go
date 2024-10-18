@@ -2,15 +2,11 @@
 package fga
 
 import (
-	"context"
-	"fmt"
-
-	sdk "github.com/openfga/go-sdk"
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-func NewAuthorizationModel(client sdkclient.SdkClient) *AuthorizationModel {
-	return &AuthorizationModel{
+func NewAuthorizationModel(client sdkclient.SdkClient) AuthorizationModel {
+	return AuthorizationModel{
 		client: client,
 	}
 }
@@ -21,94 +17,10 @@ type AuthorizationModel struct {
 }
 
 // User provides access to the "user" type's relations.
-func (m *AuthorizationModel) User() UserType { return UserType{m} }
+func (m AuthorizationModel) User() UserType { return UserType{m.client} }
 
 // Device provides access to the "device" type's relations.
-func (m *AuthorizationModel) Device() DeviceType { return DeviceType{m} }
+func (m AuthorizationModel) Device() DeviceType { return DeviceType{m.client} }
 
 // DeviceGroup provides access to the "device_group" type's relations.
-func (m *AuthorizationModel) DeviceGroup() DeviceGroupType { return DeviceGroupType{m} }
-
-func (m *AuthorizationModel) check(ctx context.Context, user Object, rel Relation, obj Object) (bool, error) {
-	res, err := m.client.Check(ctx).
-		Body(sdkclient.ClientCheckRequest{
-			User:     user.String(),
-			Relation: rel.relation(),
-			Object:   obj.String(),
-		}).
-		Execute()
-
-	if err != nil {
-		return false, err
-	}
-	return res.GetAllowed(), nil
-}
-
-func (m *AuthorizationModel) listObjects(ctx context.Context, user Object, rel Relation) ([]string, error) {
-	data, err := m.client.ListObjects(ctx).
-		Body(sdkclient.ClientListObjectsRequest{
-			User:     user.String(),
-			Relation: rel.relation(),
-		}).
-		Execute()
-
-	if err != nil {
-		return nil, err
-	}
-	return data.Objects, nil
-}
-
-func (m *AuthorizationModel) listUsers(ctx context.Context, obj Object, rel Relation) ([]sdk.User, error) {
-	data, err := m.client.ListUsers(ctx).
-		Body(sdkclient.ClientListUsersRequest{
-			Object: sdk.FgaObject{
-				Type: obj.typeName(),
-				Id:   fmt.Sprint(obj.id()),
-			},
-			Relation: rel.relation(),
-		}).
-		Execute()
-
-	if err != nil {
-		return nil, err
-	}
-	return data.Users, nil
-}
-
-func (m *AuthorizationModel) write(ctx context.Context, user Object, rel Relation, obj Object) error {
-	_, err := m.client.Write(ctx).
-		Body(sdkclient.ClientWriteRequest{
-			Writes: []sdkclient.ClientTupleKey{
-				{
-					User:     user.String(),
-					Relation: rel.relation(),
-					Object:   obj.String(),
-				},
-			},
-		}).
-		Execute()
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *AuthorizationModel) delete(ctx context.Context, user Object, rel Relation, obj Object) error {
-	_, err := m.client.Write(ctx).
-		Body(sdkclient.ClientWriteRequest{
-			Deletes: []sdkclient.ClientTupleKeyWithoutCondition{
-				{
-					User:     user.String(),
-					Relation: rel.relation(),
-					Object:   obj.String(),
-				},
-			},
-		}).
-		Execute()
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
+func (m AuthorizationModel) DeviceGroup() DeviceGroupType { return DeviceGroupType{m.client} }
