@@ -27,9 +27,9 @@ func Test_IndividualPermissions(t *testing.T) {
 	ctx := context.Background()
 	model := fga.NewAuthorizationModel(NewClient())
 
-	beth := fga.User{UserID: "beth"}
-	anne := fga.User{UserID: "anne"}
-	doc := fga.Document{DocumentID: "2021-budget"}
+	beth := fga.UserObject{UserID: "beth"}
+	anne := fga.UserObject{UserID: "anne"}
+	doc := fga.DocumentObject{DocumentID: "2021-budget"}
 
 	err := model.Document().
 		Commenter().
@@ -64,11 +64,11 @@ func Test_OrganizationPermissions(t *testing.T) {
 	ctx := context.Background()
 	model := fga.NewAuthorizationModel(NewClient())
 
-	anne := fga.User{UserID: "anne"}
-	beth := fga.User{UserID: "beth"}
-	charles := fga.User{UserID: "charles"}
-	domain := fga.Domain{DomainID: "xyz"}
-	doc := fga.Document{DocumentID: "2021-budget"}
+	anne := fga.UserObject{UserID: "anne"}
+	beth := fga.UserObject{UserID: "beth"}
+	charles := fga.UserObject{UserID: "charles"}
+	domain := fga.DomainObject{DomainID: "xyz"}
+	doc := fga.DocumentObject{DocumentID: "2021-budget"}
 
 	err := model.Domain().
 		Member().

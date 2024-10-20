@@ -114,11 +114,12 @@ func createRelations(
 						Object:   usType,
 					}
 					usType.Usersets = append(usType.Usersets, us)
-				}
-				if rel := userType.GetWildcard(); rel != nil {
+				} else if rel := userType.GetWildcard(); rel != nil {
 					ut += titleCase(rel.String()) + "Wildcard"
 
 					usType.HasWildcard = true
+				} else {
+					ut += "Object"
 				}
 
 				userTypes = append(userTypes, ut)

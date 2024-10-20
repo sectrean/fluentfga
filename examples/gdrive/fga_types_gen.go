@@ -24,9 +24,9 @@ type DocumentType struct {
 func (DocumentType) typeName() string { return "document" }
 
 // Commenter provides an interface for the "document#commenter" relation.
-func (d DocumentType) Commenter() DirectRelation[DocumentCommenterUser, Document] {
-	return DirectRelation[DocumentCommenterUser, Document]{IndirectRelation[Document]{
-		client: d.client,
+func (t DocumentType) Commenter() DirectRelationOperations[DocumentCommenterUser, DocumentObject] {
+	return directRelation[DocumentCommenterUser, DocumentObject]{relation[DocumentObject]{
+		client: t.client,
 		typ:    "document",
 		rel:    "commenter",
 	}}
@@ -34,20 +34,20 @@ func (d DocumentType) Commenter() DirectRelation[DocumentCommenterUser, Document
 
 // DocumentCommenterUser represents the possible user types for the "document#commenter" relation.
 // It is a union of the following types:
-//   - User
+//   - UserObject
 //   - DomainMemberUserset
 type DocumentCommenterUser interface {
 	Object
 	documentCommenterUser()
 }
 
-func (User) documentCommenterUser()                {}
+func (UserObject) documentCommenterUser()          {}
 func (DomainMemberUserset) documentCommenterUser() {}
 
 // Owner provides an interface for the "document#owner" relation.
-func (d DocumentType) Owner() DirectRelation[DocumentOwnerUser, Document] {
-	return DirectRelation[DocumentOwnerUser, Document]{IndirectRelation[Document]{
-		client: d.client,
+func (t DocumentType) Owner() DirectRelationOperations[DocumentOwnerUser, DocumentObject] {
+	return directRelation[DocumentOwnerUser, DocumentObject]{relation[DocumentObject]{
+		client: t.client,
 		typ:    "document",
 		rel:    "owner",
 	}}
@@ -55,29 +55,29 @@ func (d DocumentType) Owner() DirectRelation[DocumentOwnerUser, Document] {
 
 // DocumentOwnerUser represents the possible user types for the "document#owner" relation.
 // It is a union of the following types:
-//   - User
+//   - UserObject
 //   - DomainMemberUserset
 type DocumentOwnerUser interface {
 	Object
 	documentOwnerUser()
 }
 
-func (User) documentOwnerUser()                {}
+func (UserObject) documentOwnerUser()          {}
 func (DomainMemberUserset) documentOwnerUser() {}
 
 // Parent provides an interface for the "document#parent" relation.
-func (d DocumentType) Parent() DirectRelation[Document, Document] {
-	return DirectRelation[Document, Document]{IndirectRelation[Document]{
-		client: d.client,
+func (t DocumentType) Parent() DirectRelationOperations[DocumentObject, DocumentObject] {
+	return directRelation[DocumentObject, DocumentObject]{relation[DocumentObject]{
+		client: t.client,
 		typ:    "document",
 		rel:    "parent",
 	}}
 }
 
 // Viewer provides an interface for the "document#viewer" relation.
-func (d DocumentType) Viewer() DirectRelation[DocumentViewerUser, Document] {
-	return DirectRelation[DocumentViewerUser, Document]{IndirectRelation[Document]{
-		client: d.client,
+func (t DocumentType) Viewer() DirectRelationOperations[DocumentViewerUser, DocumentObject] {
+	return directRelation[DocumentViewerUser, DocumentObject]{relation[DocumentObject]{
+		client: t.client,
 		typ:    "document",
 		rel:    "viewer",
 	}}
@@ -85,7 +85,7 @@ func (d DocumentType) Viewer() DirectRelation[DocumentViewerUser, Document] {
 
 // DocumentViewerUser represents the possible user types for the "document#viewer" relation.
 // It is a union of the following types:
-//   - User
+//   - UserObject
 //   - UserWildcard
 //   - DomainMemberUserset
 type DocumentViewerUser interface {
@@ -93,14 +93,14 @@ type DocumentViewerUser interface {
 	documentViewerUser()
 }
 
-func (User) documentViewerUser()                {}
+func (UserObject) documentViewerUser()          {}
 func (UserWildcard) documentViewerUser()        {}
 func (DomainMemberUserset) documentViewerUser() {}
 
 // Writer provides an interface for the "document#writer" relation.
-func (d DocumentType) Writer() DirectRelation[DocumentWriterUser, Document] {
-	return DirectRelation[DocumentWriterUser, Document]{IndirectRelation[Document]{
-		client: d.client,
+func (t DocumentType) Writer() DirectRelationOperations[DocumentWriterUser, DocumentObject] {
+	return directRelation[DocumentWriterUser, DocumentObject]{relation[DocumentObject]{
+		client: t.client,
 		typ:    "document",
 		rel:    "writer",
 	}}
@@ -108,14 +108,14 @@ func (d DocumentType) Writer() DirectRelation[DocumentWriterUser, Document] {
 
 // DocumentWriterUser represents the possible user types for the "document#writer" relation.
 // It is a union of the following types:
-//   - User
+//   - UserObject
 //   - DomainMemberUserset
 type DocumentWriterUser interface {
 	Object
 	documentWriterUser()
 }
 
-func (User) documentWriterUser()                {}
+func (UserObject) documentWriterUser()          {}
 func (DomainMemberUserset) documentWriterUser() {}
 
 // DomainType represents the "domain" type and provides interfaces for its relations.
@@ -126,9 +126,9 @@ type DomainType struct {
 func (DomainType) typeName() string { return "domain" }
 
 // Member provides an interface for the "domain#member" relation.
-func (d DomainType) Member() DirectRelation[User, Domain] {
-	return DirectRelation[User, Domain]{IndirectRelation[Domain]{
-		client: d.client,
+func (t DomainType) Member() DirectRelationOperations[UserObject, DomainObject] {
+	return directRelation[UserObject, DomainObject]{relation[DomainObject]{
+		client: t.client,
 		typ:    "domain",
 		rel:    "member",
 	}}

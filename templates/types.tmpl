@@ -21,9 +21,9 @@ func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
 
 {{ if eq (len .UserTypes) 0 }}
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
-func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRelation[{{ .Object.Type }}] {
-    return IndirectRelation[{{ .Object.Type }}]{
-        client: {{ abbr .Object.Type }}.client,
+func (t {{ .Object.Type }}Type) {{ .Type }}() RelationOperations[{{ .Object.Type }}Object] {
+    return relation[{{ .Object.Type }}Object]{
+        client: t.client,
         typ: "{{ .Object.Name }}",
         rel: "{{ .Name }}",
     }
@@ -36,9 +36,9 @@ func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() IndirectRela
 {{ end }}
 
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
-func ({{ abbr .Object.Type }} {{ .Object.Type }}Type) {{ .Type }}() DirectRelation[{{ $relUserType }}, {{ .Object.Type }}] {
-    return DirectRelation[{{ $relUserType }}, {{ .Object.Type }}]{IndirectRelation[{{ .Object.Type }}]{
-        client: {{ abbr .Object.Type }}.client,
+func (t {{ .Object.Type }}Type) {{ .Type }}() DirectRelationOperations[{{ $relUserType }}, {{ .Object.Type }}Object] {
+    return directRelation[{{ $relUserType }}, {{ .Object.Type }}Object]{relation[{{ .Object.Type }}Object]{
+        client: t.client,
         typ: "{{ .Object.Name }}",
         rel: "{{ .Name }}",
     }}

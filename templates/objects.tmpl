@@ -3,9 +3,18 @@
 {{ define "objects" }}
 {{ template "_header" . }}
 
+// Object represents an entity in the system.
+//
+// An object is a combination of a type and an identifier.
+// 
+// For example:
+// - workspace:fb83c013-3060-41f4-9590-d3233a67938f
+// - repository:auth0/express-jwt
+// - organization:org_ajUc9kJ
+// - document:new-roadmap
 type Object interface {
     typeName() string
-    id() string
+    identifier() string
     String() string
 }
 
@@ -19,14 +28,14 @@ type ContextualTuple interface {
 }
 
 {{ range .Types }}
-// {{ .Type }} represents an object of the "{{ .Name }}" type.
-type {{ .Type }} struct {
+// {{ .Type }}Object represents an object of the "{{ .Name }}" type.
+type {{ .Type }}Object struct {
     {{ .IDName }} {{ .IDType }}
 }
 
-func ({{ .Type }}) typeName() string { return "{{ .Name }}" }
-func ({{ abbr .Type }} {{ .Type }}) id() string { return fmt.Sprint({{ abbr .Type }}.{{ .IDName }}) }
-func ({{ abbr .Type }} {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", {{ abbr .Type }}.{{ .IDName }}) }
+func ({{ .Type }}Object) typeName() string { return "{{ .Name }}" }
+func (o {{ .Type }}Object) identifier() string { return fmt.Sprint(o.{{ .IDName }}) }
+func (o {{ .Type }}Object) String() string { return fmt.Sprint("{{ .Name }}:", o.{{ .IDName }}) }
 
 {{ if .HasWildcard }}
 {{ $wildcardType := print .Type "Wildcard" }}
@@ -34,7 +43,7 @@ func ({{ abbr .Type }} {{ .Type }}) String() string { return fmt.Sprint("{{ .Nam
 type {{ $wildcardType }} struct{}
 
 func ({{ $wildcardType }}) typeName() string { return "{{ .Name }}" }
-func ({{ $wildcardType }}) id() string { return "*" }
+func ({{ $wildcardType }}) identifier() string { return "*" }
 func ({{ $wildcardType }}) String() string { return "{{ .Name }}:*" }
 
 {{ end }}
@@ -43,15 +52,15 @@ func ({{ $wildcardType }}) String() string { return "{{ .Name }}:*" }
 {{ $usersetType := print .Type }}
 // {{ $usersetType }} is the "{{ .Object.Name }}:{{ print "{" .Object.IDName "}" }}#{{ .Relation }}" userset.
 type {{ $usersetType }} struct {
-    {{ .Object.Type }}
+    {{ .Object.Type }}Object
 }
 
 func ({{ $usersetType }}) relation() string { return "{{ .Relation }}" }
-func (u {{ $usersetType }}) String() string { return fmt.Sprint("{{ .Object.Name }}:", u.id(), "#{{ .Relation }}") }
+func (u {{ $usersetType }}) String() string { return fmt.Sprint("{{ .Object.Name }}:", u.identifier(), "#{{ .Relation }}") }
 
 // {{ .Object.Type }}Userset returns the "{{ .Object.Name }}:{{ print "{" .Object.IDName "}" }}#{{ .Relation }}" userset.
-func ({{ abbr .Object.Type }} {{ .Object.Type }}) {{ titleCase .Relation }}Userset() {{ $usersetType }} {
-    return {{ $usersetType }}{ {{ abbr .Object.Type }} }
+func (o {{ .Object.Type }}Object) {{ titleCase .Relation }}Userset() {{ $usersetType }} {
+    return {{ $usersetType }}{ o }
 }
 
 {{ end }}
@@ -94,8 +103,9 @@ func newObjects[O Object](objs []string) ([]O, error) {
 func newObject(typ, id string) Object {
     switch typ {
 {{- range .Types }}
+{{ $objType := print .Type "Object" }}
     case "{{ .Name }}":
-        return {{ .Type }}{ {{ .IDName }}: id }
+        return {{ $objType }}{ {{ .IDName }}: id }
 {{- end }}
 
     default:
@@ -138,7 +148,7 @@ func newUserset(typ, id, rel string) Userset {
 {{- range .Types }}
 {{- range .Usersets }}
     if typ == "{{ .Object.Name }}" && rel == "{{ .Relation }}" {
-        return {{ .Type }}{ {{ .Object.Type }} { {{ .Object.IDName }}: id } }
+        return {{ .Type }}{ {{ .Object.Type }}Object { {{ .Object.IDName }}: id } }
     }
 {{- end }}
 {{- end }}
@@ -151,21 +161,21 @@ func newUserset(typ, id, rel string) Userset {
 // If the authorization model version used by OpenFGA is different from the one this code was generated for,
 // it's possible that the server will return objects that are not known to this code.
 type unknownObject struct {
-    objType, objID string
+    typ, id string
 }
 
-func (o unknownObject) typeName() string { return o.objType }
-func (o unknownObject) id() string { return o.objID }
-func (o unknownObject) String() string { return fmt.Sprint(o.objType, ":", o.objID) }
+func (o unknownObject) typeName() string { return o.typ }
+func (o unknownObject) identifier() string { return o.id }
+func (o unknownObject) String() string { return fmt.Sprint(o.typ, ":", o.id) }
 
 type unknownUserset struct {
-    objType, objID, rel string
+    typ, id, rel string
 }
 
-func (u unknownUserset) typeName() string { return u.objType }
-func (u unknownUserset) id() string { return u.objID }
+func (u unknownUserset) typeName() string { return u.typ }
+func (u unknownUserset) identifier() string { return u.id }
 func (u unknownUserset) relation() string { return u.rel }
-func (u unknownUserset) String() string { return fmt.Sprint(u.objType, ":", u.objID, '#', u.rel) }
+func (u unknownUserset) String() string { return fmt.Sprint(u.typ, ":", u.id, '#', u.rel) }
 
 
 {{ end }}

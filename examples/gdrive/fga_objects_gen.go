@@ -10,9 +10,18 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
+// Object represents an entity in the system.
+//
+// An object is a combination of a type and an identifier.
+//
+// For example:
+// - workspace:fb83c013-3060-41f4-9590-d3233a67938f
+// - repository:auth0/express-jwt
+// - organization:org_ajUc9kJ
+// - document:new-roadmap
 type Object interface {
 	typeName() string
-	id() string
+	identifier() string
 	String() string
 }
 
@@ -25,51 +34,51 @@ type ContextualTuple interface {
 	tuple() sdkclient.ClientTupleKey
 }
 
-// User represents an object of the "user" type.
-type User struct {
+// UserObject represents an object of the "user" type.
+type UserObject struct {
 	UserID string
 }
 
-func (User) typeName() string { return "user" }
-func (u User) id() string     { return fmt.Sprint(u.UserID) }
-func (u User) String() string { return fmt.Sprint("user:", u.UserID) }
+func (UserObject) typeName() string     { return "user" }
+func (o UserObject) identifier() string { return fmt.Sprint(o.UserID) }
+func (o UserObject) String() string     { return fmt.Sprint("user:", o.UserID) }
 
 // UserWildcard represents public access: "user:*".
 type UserWildcard struct{}
 
-func (UserWildcard) typeName() string { return "user" }
-func (UserWildcard) id() string       { return "*" }
-func (UserWildcard) String() string   { return "user:*" }
+func (UserWildcard) typeName() string   { return "user" }
+func (UserWildcard) identifier() string { return "*" }
+func (UserWildcard) String() string     { return "user:*" }
 
-// Document represents an object of the "document" type.
-type Document struct {
+// DocumentObject represents an object of the "document" type.
+type DocumentObject struct {
 	DocumentID string
 }
 
-func (Document) typeName() string { return "document" }
-func (d Document) id() string     { return fmt.Sprint(d.DocumentID) }
-func (d Document) String() string { return fmt.Sprint("document:", d.DocumentID) }
+func (DocumentObject) typeName() string     { return "document" }
+func (o DocumentObject) identifier() string { return fmt.Sprint(o.DocumentID) }
+func (o DocumentObject) String() string     { return fmt.Sprint("document:", o.DocumentID) }
 
-// Domain represents an object of the "domain" type.
-type Domain struct {
+// DomainObject represents an object of the "domain" type.
+type DomainObject struct {
 	DomainID string
 }
 
-func (Domain) typeName() string { return "domain" }
-func (d Domain) id() string     { return fmt.Sprint(d.DomainID) }
-func (d Domain) String() string { return fmt.Sprint("domain:", d.DomainID) }
+func (DomainObject) typeName() string     { return "domain" }
+func (o DomainObject) identifier() string { return fmt.Sprint(o.DomainID) }
+func (o DomainObject) String() string     { return fmt.Sprint("domain:", o.DomainID) }
 
 // DomainMemberUserset is the "domain:{DomainID}#member" userset.
 type DomainMemberUserset struct {
-	Domain
+	DomainObject
 }
 
 func (DomainMemberUserset) relation() string { return "member" }
-func (u DomainMemberUserset) String() string { return fmt.Sprint("domain:", u.id(), "#member") }
+func (u DomainMemberUserset) String() string { return fmt.Sprint("domain:", u.identifier(), "#member") }
 
 // DomainUserset returns the "domain:{DomainID}#member" userset.
-func (d Domain) MemberUserset() DomainMemberUserset {
-	return DomainMemberUserset{d}
+func (o DomainObject) MemberUserset() DomainMemberUserset {
+	return DomainMemberUserset{o}
 }
 
 func parseObject[O Object](s string) (o O, _ error) {
@@ -107,12 +116,15 @@ func newObjects[O Object](objs []string) ([]O, error) {
 
 func newObject(typ, id string) Object {
 	switch typ {
+
 	case "user":
-		return User{UserID: id}
+		return UserObject{UserID: id}
+
 	case "document":
-		return Document{DocumentID: id}
+		return DocumentObject{DocumentID: id}
+
 	case "domain":
-		return Domain{DomainID: id}
+		return DomainObject{DomainID: id}
 
 	default:
 		return unknownObject{typ, id}
@@ -152,7 +164,7 @@ func newUser(u sdk.User) (Object, error) {
 
 func newUserset(typ, id, rel string) Userset {
 	if typ == "domain" && rel == "member" {
-		return DomainMemberUserset{Domain{DomainID: id}}
+		return DomainMemberUserset{DomainObject{DomainID: id}}
 	}
 
 	return unknownUserset{typ, id, rel}
@@ -163,18 +175,18 @@ func newUserset(typ, id, rel string) Userset {
 // If the authorization model version used by OpenFGA is different from the one this code was generated for,
 // it's possible that the server will return objects that are not known to this code.
 type unknownObject struct {
-	objType, objID string
+	typ, id string
 }
 
-func (o unknownObject) typeName() string { return o.objType }
-func (o unknownObject) id() string       { return o.objID }
-func (o unknownObject) String() string   { return fmt.Sprint(o.objType, ":", o.objID) }
+func (o unknownObject) typeName() string   { return o.typ }
+func (o unknownObject) identifier() string { return o.id }
+func (o unknownObject) String() string     { return fmt.Sprint(o.typ, ":", o.id) }
 
 type unknownUserset struct {
-	objType, objID, rel string
+	typ, id, rel string
 }
 
-func (u unknownUserset) typeName() string { return u.objType }
-func (u unknownUserset) id() string       { return u.objID }
-func (u unknownUserset) relation() string { return u.rel }
-func (u unknownUserset) String() string   { return fmt.Sprint(u.objType, ":", u.objID, '#', u.rel) }
+func (u unknownUserset) typeName() string   { return u.typ }
+func (u unknownUserset) identifier() string { return u.id }
+func (u unknownUserset) relation() string   { return u.rel }
+func (u unknownUserset) String() string     { return fmt.Sprint(u.typ, ":", u.id, '#', u.rel) }

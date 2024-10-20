@@ -3,6 +3,7 @@ package fga
 
 import (
 	"context"
+	"fmt"
 
 	sdk "github.com/openfga/go-sdk"
 	sdkclient "github.com/openfga/go-sdk/client"
@@ -11,19 +12,32 @@ import (
 type Relation interface {
 	typeName() string
 	relation() string
+	String() string
 }
 
-type IndirectRelation[O Object] struct {
+type RelationOperations[O Object] interface {
+	Check(ctx context.Context, user Object, object O, opts ...CheckOption) (bool, error)
+	ListObjects(ctx context.Context, user Object, opts ...ListObjectsOption) ([]O, error)
+	ListUsers(ctx context.Context, object O, opts ...ListUsersOption) ([]Object, error)
+}
+
+type DirectRelationOperations[U Object, O Object] interface {
+	RelationOperations[O]
+	Write(ctx context.Context, user U, object O, opts ...WriteOption) error
+	Delete(ctx context.Context, user U, object O, opts ...WriteOption) error
+}
+
+type relation[O Object] struct {
 	client sdkclient.SdkClient
-
-	typ string
-	rel string
+	typ    string
+	rel    string
 }
 
-func (r IndirectRelation[O]) typeName() string { return r.typ }
-func (r IndirectRelation[O]) relation() string { return r.rel }
+func (r relation[O]) typeName() string { return r.typ }
+func (r relation[O]) relation() string { return r.rel }
+func (r relation[O]) String() string   { return fmt.Sprint(r.typ, "#", r.rel) }
 
-func (r IndirectRelation[O]) Check(ctx context.Context, user Object, object O, opts ...CheckOption) (bool, error) {
+func (r relation[O]) Check(ctx context.Context, user Object, object O, opts ...CheckOption) (bool, error) {
 	req := r.client.Check(ctx).
 		Body(sdkclient.ClientCheckRequest{
 			User:     user.String(),
@@ -43,7 +57,7 @@ func (r IndirectRelation[O]) Check(ctx context.Context, user Object, object O, o
 	return res.GetAllowed(), nil
 }
 
-func (r IndirectRelation[O]) ListObjects(ctx context.Context, user Object, opts ...ListObjectsOption) ([]O, error) {
+func (r relation[O]) ListObjects(ctx context.Context, user Object, opts ...ListObjectsOption) ([]O, error) {
 	req := r.client.ListObjects(ctx).
 		Body(sdkclient.ClientListObjectsRequest{
 			User:     user.String(),
@@ -62,12 +76,12 @@ func (r IndirectRelation[O]) ListObjects(ctx context.Context, user Object, opts 
 	return newObjects[O](data.Objects)
 }
 
-func (r IndirectRelation[O]) ListUsers(ctx context.Context, object O, opts ...ListUsersOption) ([]Object, error) {
+func (r relation[O]) ListUsers(ctx context.Context, object O, opts ...ListUsersOption) ([]Object, error) {
 	req := r.client.ListUsers(ctx).
 		Body(sdkclient.ClientListUsersRequest{
 			Object: sdk.FgaObject{
 				Type: object.typeName(),
-				Id:   object.id(),
+				Id:   object.identifier(),
 			},
 			Relation: r.relation(),
 		})
@@ -84,17 +98,17 @@ func (r IndirectRelation[O]) ListUsers(ctx context.Context, object O, opts ...Li
 	return newUsers(data.Users)
 }
 
-type DirectRelation[U Object, O Object] struct {
-	IndirectRelation[O]
+type directRelation[U Object, O Object] struct {
+	relation[O]
 }
 
-func (r DirectRelation[U, O]) Write(ctx context.Context, user U, object O, opts ...WriteOption) error {
+func (r directRelation[U, O]) Write(ctx context.Context, user U, object O, opts ...WriteOption) error {
 	req := r.client.Write(ctx).
 		Body(sdkclient.ClientWriteRequest{
 			Writes: []sdkclient.ClientTupleKey{
 				{
 					User:     user.String(),
-					Relation: r.relation(),
+					Relation: r.rel,
 					Object:   object.String(),
 				},
 			},
@@ -112,13 +126,13 @@ func (r DirectRelation[U, O]) Write(ctx context.Context, user U, object O, opts 
 	return nil
 }
 
-func (r DirectRelation[U, O]) Delete(ctx context.Context, user U, object O, opts ...WriteOption) error {
+func (r directRelation[U, O]) Delete(ctx context.Context, user U, object O, opts ...WriteOption) error {
 	req := r.client.Write(ctx).
 		Body(sdkclient.ClientWriteRequest{
 			Deletes: []sdkclient.ClientTupleKeyWithoutCondition{
 				{
 					User:     user.String(),
-					Relation: r.relation(),
+					Relation: r.rel,
 					Object:   object.String(),
 				},
 			},

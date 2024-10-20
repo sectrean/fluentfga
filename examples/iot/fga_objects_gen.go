@@ -10,9 +10,18 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
+// Object represents an entity in the system.
+//
+// An object is a combination of a type and an identifier.
+//
+// For example:
+// - workspace:fb83c013-3060-41f4-9590-d3233a67938f
+// - repository:auth0/express-jwt
+// - organization:org_ajUc9kJ
+// - document:new-roadmap
 type Object interface {
 	typeName() string
-	id() string
+	identifier() string
 	String() string
 }
 
@@ -25,61 +34,61 @@ type ContextualTuple interface {
 	tuple() sdkclient.ClientTupleKey
 }
 
-// User represents an object of the "user" type.
-type User struct {
+// UserObject represents an object of the "user" type.
+type UserObject struct {
 	UserID string
 }
 
-func (User) typeName() string { return "user" }
-func (u User) id() string     { return fmt.Sprint(u.UserID) }
-func (u User) String() string { return fmt.Sprint("user:", u.UserID) }
+func (UserObject) typeName() string     { return "user" }
+func (o UserObject) identifier() string { return fmt.Sprint(o.UserID) }
+func (o UserObject) String() string     { return fmt.Sprint("user:", o.UserID) }
 
-// Device represents an object of the "device" type.
-type Device struct {
+// DeviceObject represents an object of the "device" type.
+type DeviceObject struct {
 	DeviceID string
 }
 
-func (Device) typeName() string { return "device" }
-func (d Device) id() string     { return fmt.Sprint(d.DeviceID) }
-func (d Device) String() string { return fmt.Sprint("device:", d.DeviceID) }
+func (DeviceObject) typeName() string     { return "device" }
+func (o DeviceObject) identifier() string { return fmt.Sprint(o.DeviceID) }
+func (o DeviceObject) String() string     { return fmt.Sprint("device:", o.DeviceID) }
 
-// DeviceGroup represents an object of the "device_group" type.
-type DeviceGroup struct {
+// DeviceGroupObject represents an object of the "device_group" type.
+type DeviceGroupObject struct {
 	DeviceGroupID string
 }
 
-func (DeviceGroup) typeName() string { return "device_group" }
-func (d DeviceGroup) id() string     { return fmt.Sprint(d.DeviceGroupID) }
-func (d DeviceGroup) String() string { return fmt.Sprint("device_group:", d.DeviceGroupID) }
+func (DeviceGroupObject) typeName() string     { return "device_group" }
+func (o DeviceGroupObject) identifier() string { return fmt.Sprint(o.DeviceGroupID) }
+func (o DeviceGroupObject) String() string     { return fmt.Sprint("device_group:", o.DeviceGroupID) }
 
 // DeviceGroupItAdminUserset is the "device_group:{DeviceGroupID}#it_admin" userset.
 type DeviceGroupItAdminUserset struct {
-	DeviceGroup
+	DeviceGroupObject
 }
 
 func (DeviceGroupItAdminUserset) relation() string { return "it_admin" }
 func (u DeviceGroupItAdminUserset) String() string {
-	return fmt.Sprint("device_group:", u.id(), "#it_admin")
+	return fmt.Sprint("device_group:", u.identifier(), "#it_admin")
 }
 
 // DeviceGroupUserset returns the "device_group:{DeviceGroupID}#it_admin" userset.
-func (d DeviceGroup) ItAdminUserset() DeviceGroupItAdminUserset {
-	return DeviceGroupItAdminUserset{d}
+func (o DeviceGroupObject) ItAdminUserset() DeviceGroupItAdminUserset {
+	return DeviceGroupItAdminUserset{o}
 }
 
 // DeviceGroupSecurityGuardUserset is the "device_group:{DeviceGroupID}#security_guard" userset.
 type DeviceGroupSecurityGuardUserset struct {
-	DeviceGroup
+	DeviceGroupObject
 }
 
 func (DeviceGroupSecurityGuardUserset) relation() string { return "security_guard" }
 func (u DeviceGroupSecurityGuardUserset) String() string {
-	return fmt.Sprint("device_group:", u.id(), "#security_guard")
+	return fmt.Sprint("device_group:", u.identifier(), "#security_guard")
 }
 
 // DeviceGroupUserset returns the "device_group:{DeviceGroupID}#security_guard" userset.
-func (d DeviceGroup) SecurityGuardUserset() DeviceGroupSecurityGuardUserset {
-	return DeviceGroupSecurityGuardUserset{d}
+func (o DeviceGroupObject) SecurityGuardUserset() DeviceGroupSecurityGuardUserset {
+	return DeviceGroupSecurityGuardUserset{o}
 }
 
 func parseObject[O Object](s string) (o O, _ error) {
@@ -117,12 +126,15 @@ func newObjects[O Object](objs []string) ([]O, error) {
 
 func newObject(typ, id string) Object {
 	switch typ {
+
 	case "user":
-		return User{UserID: id}
+		return UserObject{UserID: id}
+
 	case "device":
-		return Device{DeviceID: id}
+		return DeviceObject{DeviceID: id}
+
 	case "device_group":
-		return DeviceGroup{DeviceGroupID: id}
+		return DeviceGroupObject{DeviceGroupID: id}
 
 	default:
 		return unknownObject{typ, id}
@@ -162,10 +174,10 @@ func newUser(u sdk.User) (Object, error) {
 
 func newUserset(typ, id, rel string) Userset {
 	if typ == "device_group" && rel == "it_admin" {
-		return DeviceGroupItAdminUserset{DeviceGroup{DeviceGroupID: id}}
+		return DeviceGroupItAdminUserset{DeviceGroupObject{DeviceGroupID: id}}
 	}
 	if typ == "device_group" && rel == "security_guard" {
-		return DeviceGroupSecurityGuardUserset{DeviceGroup{DeviceGroupID: id}}
+		return DeviceGroupSecurityGuardUserset{DeviceGroupObject{DeviceGroupID: id}}
 	}
 
 	return unknownUserset{typ, id, rel}
@@ -176,18 +188,18 @@ func newUserset(typ, id, rel string) Userset {
 // If the authorization model version used by OpenFGA is different from the one this code was generated for,
 // it's possible that the server will return objects that are not known to this code.
 type unknownObject struct {
-	objType, objID string
+	typ, id string
 }
 
-func (o unknownObject) typeName() string { return o.objType }
-func (o unknownObject) id() string       { return o.objID }
-func (o unknownObject) String() string   { return fmt.Sprint(o.objType, ":", o.objID) }
+func (o unknownObject) typeName() string   { return o.typ }
+func (o unknownObject) identifier() string { return o.id }
+func (o unknownObject) String() string     { return fmt.Sprint(o.typ, ":", o.id) }
 
 type unknownUserset struct {
-	objType, objID, rel string
+	typ, id, rel string
 }
 
-func (u unknownUserset) typeName() string { return u.objType }
-func (u unknownUserset) id() string       { return u.objID }
-func (u unknownUserset) relation() string { return u.rel }
-func (u unknownUserset) String() string   { return fmt.Sprint(u.objType, ":", u.objID, '#', u.rel) }
+func (u unknownUserset) typeName() string   { return u.typ }
+func (u unknownUserset) identifier() string { return u.id }
+func (u unknownUserset) relation() string   { return u.rel }
+func (u unknownUserset) String() string     { return fmt.Sprint(u.typ, ":", u.id, '#', u.rel) }

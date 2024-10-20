@@ -27,8 +27,8 @@ func Test(t *testing.T) {
 	ctx := context.Background()
 	model := fga.NewAuthorizationModel(NewClient())
 
-	anne := fga.User{UserID: "anne"}
-	device := fga.Device{DeviceID: "1"}
+	anne := fga.UserObject{UserID: "anne"}
+	device := fga.DeviceObject{DeviceID: "1"}
 
 	err := model.Device().
 		SecurityGuard().
