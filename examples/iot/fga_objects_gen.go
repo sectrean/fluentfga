@@ -101,7 +101,10 @@ func parseObject[O Object](s string) (o O, _ error) {
 
 	o, ok := object.(O)
 	if !ok {
-		return o, fmt.Errorf("unexpected object type: %q", s)
+		return o, fmt.Errorf(
+			"unexpected object type: %T does not implement %T: object %q",
+			object, o, s,
+		)
 	}
 
 	return o, nil
