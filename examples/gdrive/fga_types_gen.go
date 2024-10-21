@@ -15,6 +15,7 @@ type UserType struct {
 }
 
 func (UserType) typeName() string { return "user" }
+func (UserType) String() string   { return "user" }
 
 // DocumentType represents the "document" type and provides interfaces for its relations.
 type DocumentType struct {
@@ -22,9 +23,10 @@ type DocumentType struct {
 }
 
 func (DocumentType) typeName() string { return "document" }
+func (DocumentType) String() string   { return "document" }
 
 // Commenter provides an interface for the "document#commenter" relation.
-func (t DocumentType) Commenter() DirectRelationOperations[DocumentCommenterUser, DocumentObject] {
+func (t DocumentType) Commenter() DirectRelationInterface[DocumentCommenterUser, DocumentObject] {
 	return directRelation[DocumentCommenterUser, DocumentObject]{relation[DocumentObject]{
 		client: t.client,
 		typ:    "document",
@@ -33,6 +35,7 @@ func (t DocumentType) Commenter() DirectRelationOperations[DocumentCommenterUser
 }
 
 // DocumentCommenterUser represents the possible user types for the "document#commenter" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - DomainMemberUserset
@@ -45,7 +48,7 @@ func (UserObject) documentCommenterUser()          {}
 func (DomainMemberUserset) documentCommenterUser() {}
 
 // Owner provides an interface for the "document#owner" relation.
-func (t DocumentType) Owner() DirectRelationOperations[DocumentOwnerUser, DocumentObject] {
+func (t DocumentType) Owner() DirectRelationInterface[DocumentOwnerUser, DocumentObject] {
 	return directRelation[DocumentOwnerUser, DocumentObject]{relation[DocumentObject]{
 		client: t.client,
 		typ:    "document",
@@ -54,6 +57,7 @@ func (t DocumentType) Owner() DirectRelationOperations[DocumentOwnerUser, Docume
 }
 
 // DocumentOwnerUser represents the possible user types for the "document#owner" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - DomainMemberUserset
@@ -66,7 +70,7 @@ func (UserObject) documentOwnerUser()          {}
 func (DomainMemberUserset) documentOwnerUser() {}
 
 // Parent provides an interface for the "document#parent" relation.
-func (t DocumentType) Parent() DirectRelationOperations[DocumentObject, DocumentObject] {
+func (t DocumentType) Parent() DirectRelationInterface[DocumentObject, DocumentObject] {
 	return directRelation[DocumentObject, DocumentObject]{relation[DocumentObject]{
 		client: t.client,
 		typ:    "document",
@@ -75,7 +79,7 @@ func (t DocumentType) Parent() DirectRelationOperations[DocumentObject, Document
 }
 
 // Viewer provides an interface for the "document#viewer" relation.
-func (t DocumentType) Viewer() DirectRelationOperations[DocumentViewerUser, DocumentObject] {
+func (t DocumentType) Viewer() DirectRelationInterface[DocumentViewerUser, DocumentObject] {
 	return directRelation[DocumentViewerUser, DocumentObject]{relation[DocumentObject]{
 		client: t.client,
 		typ:    "document",
@@ -84,6 +88,7 @@ func (t DocumentType) Viewer() DirectRelationOperations[DocumentViewerUser, Docu
 }
 
 // DocumentViewerUser represents the possible user types for the "document#viewer" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - UserWildcard
@@ -98,7 +103,7 @@ func (UserWildcard) documentViewerUser()        {}
 func (DomainMemberUserset) documentViewerUser() {}
 
 // Writer provides an interface for the "document#writer" relation.
-func (t DocumentType) Writer() DirectRelationOperations[DocumentWriterUser, DocumentObject] {
+func (t DocumentType) Writer() DirectRelationInterface[DocumentWriterUser, DocumentObject] {
 	return directRelation[DocumentWriterUser, DocumentObject]{relation[DocumentObject]{
 		client: t.client,
 		typ:    "document",
@@ -107,6 +112,7 @@ func (t DocumentType) Writer() DirectRelationOperations[DocumentWriterUser, Docu
 }
 
 // DocumentWriterUser represents the possible user types for the "document#writer" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - DomainMemberUserset
@@ -124,9 +130,10 @@ type DomainType struct {
 }
 
 func (DomainType) typeName() string { return "domain" }
+func (DomainType) String() string   { return "domain" }
 
 // Member provides an interface for the "domain#member" relation.
-func (t DomainType) Member() DirectRelationOperations[UserObject, DomainObject] {
+func (t DomainType) Member() DirectRelationInterface[UserObject, DomainObject] {
 	return directRelation[UserObject, DomainObject]{relation[DomainObject]{
 		client: t.client,
 		typ:    "domain",

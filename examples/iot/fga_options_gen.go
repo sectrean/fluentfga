@@ -2,6 +2,7 @@
 package fga
 
 import (
+	sdk "github.com/openfga/go-sdk"
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
@@ -76,4 +77,28 @@ func (o checkContextOption) applyListObjectsOption(req sdkclient.SdkClientListOb
 
 func (o checkContextOption) applyListUsersOption(req sdkclient.SdkClientListUsersRequestInterface) {
 	req.GetBody().Context = o.Context
+}
+
+func WithUserTypeFilter(types ...Type) ListUsersOption {
+	return userTypeFilterOption{types}
+}
+
+type userTypeFilterOption struct {
+	Types []Type
+}
+
+func (o userTypeFilterOption) applyListUsersOption(req sdkclient.SdkClientListUsersRequestInterface) {
+	body := req.GetBody()
+
+	for _, t := range o.Types {
+		filter := sdk.UserTypeFilter{
+			Type: t.typeName(),
+		}
+		if r, ok := t.(Relation); ok {
+			rel := r.relation()
+			filter.Relation = &rel
+		}
+
+		body.UserFilters = append(body.UserFilters, filter)
+	}
 }

@@ -126,13 +126,10 @@ func newObjects[O Object](objs []string) ([]O, error) {
 
 func newObject(typ, id string) Object {
 	switch typ {
-
 	case "user":
 		return UserObject{UserID: id}
-
 	case "device":
 		return DeviceObject{DeviceID: id}
-
 	case "device_group":
 		return DeviceGroupObject{DeviceGroupID: id}
 
@@ -162,11 +159,11 @@ func newUser(u sdk.User) (Object, error) {
 	if u.Object != nil {
 		return newObject(u.Object.Type, u.Object.Id), nil
 	}
-	if u.Userset != nil {
-		return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation), nil
-	}
 	if u.Wildcard != nil {
 		return newObject(u.Wildcard.Type, "*"), nil
+	}
+	if u.Userset != nil {
+		return newUserset(u.Userset.Type, u.Userset.Id, u.Userset.Relation), nil
 	}
 
 	return nil, fmt.Errorf("unknown user type %v", u)

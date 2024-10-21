@@ -6,17 +6,16 @@
 type Relation interface {
     typeName() string
     relation() string
-	String() string
 }
 
-type RelationOperations[O Object] interface {
+type RelationInterface[O Object] interface {
 	Check(ctx context.Context, user Object, object O, opts ...CheckOption) (bool, error)
 	ListObjects(ctx context.Context, user Object, opts ...ListObjectsOption) ([]O, error)
 	ListUsers(ctx context.Context, object O, opts ...ListUsersOption) ([]Object, error)
 }
 
-type DirectRelationOperations[U Object, O Object] interface {
-	RelationOperations[O]
+type DirectRelationInterface[U Object, O Object] interface {
+	RelationInterface[O]
 	Write(ctx context.Context, user U, object O, opts ...WriteOption) error
 	Delete(ctx context.Context, user U, object O, opts ...WriteOption) error
 }

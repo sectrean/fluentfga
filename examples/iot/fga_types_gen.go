@@ -15,6 +15,7 @@ type UserType struct {
 }
 
 func (UserType) typeName() string { return "user" }
+func (UserType) String() string   { return "user" }
 
 // DeviceType represents the "device" type and provides interfaces for its relations.
 type DeviceType struct {
@@ -22,9 +23,10 @@ type DeviceType struct {
 }
 
 func (DeviceType) typeName() string { return "device" }
+func (DeviceType) String() string   { return "device" }
 
 // DeviceRenamer provides an interface for the "device#device_renamer" relation.
-func (t DeviceType) DeviceRenamer() RelationOperations[DeviceObject] {
+func (t DeviceType) DeviceRenamer() RelationInterface[DeviceObject] {
 	return relation[DeviceObject]{
 		client: t.client,
 		typ:    "device",
@@ -33,7 +35,7 @@ func (t DeviceType) DeviceRenamer() RelationOperations[DeviceObject] {
 }
 
 // ItAdmin provides an interface for the "device#it_admin" relation.
-func (t DeviceType) ItAdmin() DirectRelationOperations[DeviceItAdminUser, DeviceObject] {
+func (t DeviceType) ItAdmin() DirectRelationInterface[DeviceItAdminUser, DeviceObject] {
 	return directRelation[DeviceItAdminUser, DeviceObject]{relation[DeviceObject]{
 		client: t.client,
 		typ:    "device",
@@ -42,6 +44,7 @@ func (t DeviceType) ItAdmin() DirectRelationOperations[DeviceItAdminUser, Device
 }
 
 // DeviceItAdminUser represents the possible user types for the "device#it_admin" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - DeviceGroupItAdminUserset
@@ -54,7 +57,7 @@ func (UserObject) deviceItAdminUser()                {}
 func (DeviceGroupItAdminUserset) deviceItAdminUser() {}
 
 // LiveVideoViewer provides an interface for the "device#live_video_viewer" relation.
-func (t DeviceType) LiveVideoViewer() RelationOperations[DeviceObject] {
+func (t DeviceType) LiveVideoViewer() RelationInterface[DeviceObject] {
 	return relation[DeviceObject]{
 		client: t.client,
 		typ:    "device",
@@ -63,7 +66,7 @@ func (t DeviceType) LiveVideoViewer() RelationOperations[DeviceObject] {
 }
 
 // RecordedVideoViewer provides an interface for the "device#recorded_video_viewer" relation.
-func (t DeviceType) RecordedVideoViewer() RelationOperations[DeviceObject] {
+func (t DeviceType) RecordedVideoViewer() RelationInterface[DeviceObject] {
 	return relation[DeviceObject]{
 		client: t.client,
 		typ:    "device",
@@ -72,7 +75,7 @@ func (t DeviceType) RecordedVideoViewer() RelationOperations[DeviceObject] {
 }
 
 // SecurityGuard provides an interface for the "device#security_guard" relation.
-func (t DeviceType) SecurityGuard() DirectRelationOperations[DeviceSecurityGuardUser, DeviceObject] {
+func (t DeviceType) SecurityGuard() DirectRelationInterface[DeviceSecurityGuardUser, DeviceObject] {
 	return directRelation[DeviceSecurityGuardUser, DeviceObject]{relation[DeviceObject]{
 		client: t.client,
 		typ:    "device",
@@ -81,6 +84,7 @@ func (t DeviceType) SecurityGuard() DirectRelationOperations[DeviceSecurityGuard
 }
 
 // DeviceSecurityGuardUser represents the possible user types for the "device#security_guard" relation.
+//
 // It is a union of the following types:
 //   - UserObject
 //   - DeviceGroupSecurityGuardUserset
@@ -98,9 +102,10 @@ type DeviceGroupType struct {
 }
 
 func (DeviceGroupType) typeName() string { return "device_group" }
+func (DeviceGroupType) String() string   { return "device_group" }
 
 // ItAdmin provides an interface for the "device_group#it_admin" relation.
-func (t DeviceGroupType) ItAdmin() DirectRelationOperations[UserObject, DeviceGroupObject] {
+func (t DeviceGroupType) ItAdmin() DirectRelationInterface[UserObject, DeviceGroupObject] {
 	return directRelation[UserObject, DeviceGroupObject]{relation[DeviceGroupObject]{
 		client: t.client,
 		typ:    "device_group",
@@ -109,7 +114,7 @@ func (t DeviceGroupType) ItAdmin() DirectRelationOperations[UserObject, DeviceGr
 }
 
 // SecurityGuard provides an interface for the "device_group#security_guard" relation.
-func (t DeviceGroupType) SecurityGuard() DirectRelationOperations[UserObject, DeviceGroupObject] {
+func (t DeviceGroupType) SecurityGuard() DirectRelationInterface[UserObject, DeviceGroupObject] {
 	return directRelation[UserObject, DeviceGroupObject]{relation[DeviceGroupObject]{
 		client: t.client,
 		typ:    "device_group",

@@ -15,13 +15,14 @@ type {{ .Type }}Type struct {
 }
 
 func ({{ .Type }}Type) typeName() string { return "{{ .Name }}" }
+func ({{ .Type }}Type) String() string { return "{{ .Name }}" }
 
 {{ range .Relations }}
 {{ $relType := print .Object.Type .Type }}
 
 {{ if eq (len .UserTypes) 0 }}
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
-func (t {{ .Object.Type }}Type) {{ .Type }}() RelationOperations[{{ .Object.Type }}Object] {
+func (t {{ .Object.Type }}Type) {{ .Type }}() RelationInterface[{{ .Object.Type }}Object] {
     return relation[{{ .Object.Type }}Object]{
         client: t.client,
         typ: "{{ .Object.Name }}",
@@ -36,7 +37,7 @@ func (t {{ .Object.Type }}Type) {{ .Type }}() RelationOperations[{{ .Object.Type
 {{ end }}
 
 // {{ .Type }} provides an interface for the "{{ .Object.Name}}#{{ .Name }}" relation.
-func (t {{ .Object.Type }}Type) {{ .Type }}() DirectRelationOperations[{{ $relUserType }}, {{ .Object.Type }}Object] {
+func (t {{ .Object.Type }}Type) {{ .Type }}() DirectRelationInterface[{{ $relUserType }}, {{ .Object.Type }}Object] {
     return directRelation[{{ $relUserType }}, {{ .Object.Type }}Object]{relation[{{ .Object.Type }}Object]{
         client: t.client,
         typ: "{{ .Object.Name }}",
@@ -46,6 +47,7 @@ func (t {{ .Object.Type }}Type) {{ .Type }}() DirectRelationOperations[{{ $relUs
 
 {{ if gt (len .UserTypes) 1 }}
 // {{ $relUserType }} represents the possible user types for the "{{ .Object.Name }}#{{ .Name }}" relation.
+//
 // It is a union of the following types:
 {{- range .UserTypes }}
 //   - {{ . }}
