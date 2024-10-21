@@ -115,12 +115,14 @@ func newObjects[O Object](objs []string) ([]O, error) {
 }
 
 func newObject(typ, id string) Object {
-	switch typ {
-	case "user":
+	switch {
+	case typ == "user" && id == "*":
+		return UserWildcard{}
+	case typ == "user":
 		return UserObject{UserID: id}
-	case "document":
+	case typ == "document":
 		return DocumentObject{DocumentID: id}
-	case "domain":
+	case typ == "domain":
 		return DomainObject{DomainID: id}
 
 	default:

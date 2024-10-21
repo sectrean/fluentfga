@@ -101,10 +101,14 @@ func newObjects[O Object](objs []string) ([]O, error) {
 }
 
 func newObject(typ, id string) Object {
-    switch typ {
+    switch {
 {{- range .Types }}
 {{- $objType := print .Type "Object" }}
-    case "{{ .Name }}":
+{{- if .HasWildcard }}
+    case typ == "{{ .Name }}" && id == "*":
+        return {{ .Type }}Wildcard{}
+{{- end }}
+    case typ == "{{ .Name }}":
         return {{ $objType }}{ {{ .IDName }}: id }
 {{- end }}
 

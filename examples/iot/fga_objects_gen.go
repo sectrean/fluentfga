@@ -125,12 +125,12 @@ func newObjects[O Object](objs []string) ([]O, error) {
 }
 
 func newObject(typ, id string) Object {
-	switch typ {
-	case "user":
+	switch {
+	case typ == "user":
 		return UserObject{UserID: id}
-	case "device":
+	case typ == "device":
 		return DeviceObject{DeviceID: id}
-	case "device_group":
+	case typ == "device_group":
 		return DeviceGroupObject{DeviceGroupID: id}
 
 	default:
