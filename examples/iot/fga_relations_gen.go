@@ -12,6 +12,7 @@ import (
 type Relation interface {
 	typeName() string
 	relation() string
+	String() string
 }
 
 type RelationInterface[O Object] interface {

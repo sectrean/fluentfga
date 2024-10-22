@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	sdk "github.com/openfga/go-sdk"
-	sdkclient "github.com/openfga/go-sdk/client"
 )
 
 // Object represents an entity in the system.
@@ -31,7 +30,7 @@ type Userset interface {
 }
 
 type ContextualTuple interface {
-	tuple() sdkclient.ClientTupleKey
+	tupleKey() sdk.TupleKey
 }
 
 // UserObject represents an object of the "user" type.

@@ -24,7 +24,7 @@ type Userset interface {
 }
 
 type ContextualTuple interface {
-    tuple() sdkclient.ClientTupleKey
+    tupleKey() sdk.TupleKey
 }
 
 {{ range .Types }}

@@ -41,42 +41,42 @@ type contextualTuplesOption struct {
 func (o contextualTuplesOption) applyCheckOption(req sdkclient.SdkClientCheckRequestInterface) {
 	body := req.GetBody()
 	for _, t := range o.Tuples {
-		body.ContextualTuples = append(body.ContextualTuples, t.tuple())
+		body.ContextualTuples = append(body.ContextualTuples, t.tupleKey())
 	}
 }
 
 func (o contextualTuplesOption) applyListObjectsOption(req sdkclient.SdkClientListObjectsRequestInterface) {
 	body := req.GetBody()
 	for _, t := range o.Tuples {
-		body.ContextualTuples = append(body.ContextualTuples, t.tuple())
+		body.ContextualTuples = append(body.ContextualTuples, t.tupleKey())
 	}
 }
 
 func (o contextualTuplesOption) applyListUsersOption(req sdkclient.SdkClientListUsersRequestInterface) {
 	body := req.GetBody()
 	for _, t := range o.Tuples {
-		body.ContextualTuples = append(body.ContextualTuples, t.tuple())
+		body.ContextualTuples = append(body.ContextualTuples, t.tupleKey())
 	}
 }
 
 func WithContext(context map[string]any) CheckListOption {
-	return checkContextOption{&context}
+	return checkContextOption{context}
 }
 
 type checkContextOption struct {
-	Context *map[string]any
+	Context map[string]any
 }
 
 func (o checkContextOption) applyCheckOption(req sdkclient.SdkClientCheckRequestInterface) {
-	req.GetBody().Context = o.Context
+	req.GetBody().Context = &o.Context
 }
 
 func (o checkContextOption) applyListObjectsOption(req sdkclient.SdkClientListObjectsRequestInterface) {
-	req.GetBody().Context = o.Context
+	req.GetBody().Context = &o.Context
 }
 
 func (o checkContextOption) applyListUsersOption(req sdkclient.SdkClientListUsersRequestInterface) {
-	req.GetBody().Context = o.Context
+	req.GetBody().Context = &o.Context
 }
 
 func WithUserTypeFilter(types ...Type) ListUsersOption {
