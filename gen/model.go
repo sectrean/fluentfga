@@ -1,4 +1,4 @@
-package fluentfga
+package gen
 
 import (
 	"cmp"
@@ -71,7 +71,7 @@ func newTypeDefinition(
 ) *TypeDefinition {
 	typ := titleCase(typeDef.Type)
 
-	idName := typ + "ID"
+	idName := "ID"
 	idType := "string"
 
 	if typeConfig, ok := config.Types[typeDef.Type]; ok {
@@ -118,8 +118,6 @@ func createRelations(
 					ut += titleCase(rel.String()) + "Wildcard"
 
 					usType.HasWildcard = true
-				} else {
-					ut += "Object"
 				}
 
 				userTypes = append(userTypes, ut)

@@ -1,4 +1,4 @@
-package fluentfga
+package gen
 
 import (
 	"os"

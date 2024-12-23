@@ -1,11 +1,12 @@
-package fga_test
+package model_test
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	fga "github.com/johnrutherford/fluentfga/examples/gdrive"
+	"github.com/johnrutherford/fluentfga"
+	model "github.com/johnrutherford/fluentfga/examples/gdrive"
 	sdkclient "github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,74 +26,87 @@ func NewClient() sdkclient.SdkClient {
 
 func Test_IndividualPermissions(t *testing.T) {
 	ctx := context.Background()
-	model := fga.NewAuthorizationModel(NewClient())
+	client := NewClient()
 
-	beth := fga.UserObject{UserID: "beth"}
-	anne := fga.UserObject{UserID: "anne"}
-	doc := fga.DocumentObject{DocumentID: "2021-budget"}
+	beth := model.User{ID: "beth"}
+	anne := model.User{ID: "anne"}
+	doc := model.Document{ID: "2021-budget"}
 
-	err := model.Document().
-		Commenter().
-		Write(ctx, beth, doc)
+	err := fluentfga.Write(
+		model.DocumentCommenterRelation{}.Tuple(beth, doc),
+	).Execute(ctx, client)
+
 	assert.NoError(t, err)
 
-	allowed, err := model.Document().
-		Commenter().
-		Check(ctx, beth, doc)
+	allowed, err := fluentfga.Check(
+		beth,
+		model.DocumentCommenterRelation{},
+		doc,
+	).Execute(ctx, client)
+
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 
-	err = model.Document().
-		Owner().
-		Write(ctx, anne, doc)
+	err = fluentfga.Write(
+		model.DocumentOwnerRelation{}.Tuple(anne, doc),
+	).Execute(ctx, client)
+
 	assert.NoError(t, err)
 
-	allowed, err = model.Document().
-		Owner().
-		Check(ctx, anne, doc)
+	allowed, err = fluentfga.Check(
+		anne,
+		model.DocumentOwnerRelation{},
+		doc,
+	).Execute(ctx, client)
+
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 
-	allowed, err = model.Document().
-		Writer().
-		Check(ctx, anne, doc)
+	allowed, err = fluentfga.Check(
+		anne,
+		model.DocumentWriterRelation{},
+		doc,
+	).Execute(ctx, client)
+
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 }
 
 func Test_OrganizationPermissions(t *testing.T) {
 	ctx := context.Background()
-	model := fga.NewAuthorizationModel(NewClient())
+	client := NewClient()
 
-	anne := fga.UserObject{UserID: "anne"}
-	beth := fga.UserObject{UserID: "beth"}
-	charles := fga.UserObject{UserID: "charles"}
-	domain := fga.DomainObject{DomainID: "xyz"}
-	doc := fga.DocumentObject{DocumentID: "2021-budget"}
+	anne := model.User{ID: "anne"}
+	beth := model.User{ID: "beth"}
+	charles := model.User{ID: "charles"}
+	domain := model.Domain{ID: "xyz"}
+	doc := model.Document{ID: "2021-budget"}
 
-	err := model.Domain().
-		Member().
-		Write(ctx, anne, domain)
+	err := fluentfga.Write(
+		model.DomainMemberRelation{}.Tuple(anne, domain),
+	).Execute(ctx, client)
 	assert.NoError(t, err)
 
-	err = model.Domain().
-		Member().
-		Write(ctx, beth, domain)
+	err = fluentfga.Write(
+		model.DomainMemberRelation{}.Tuple(beth, domain),
+	).Execute(ctx, client)
 	assert.NoError(t, err)
 
-	err = model.Domain().
-		Member().
-		Write(ctx, charles, domain)
+	err = fluentfga.Write(
+		model.DomainMemberRelation{}.Tuple(charles, domain),
+	).Execute(ctx, client)
 	assert.NoError(t, err)
 
-	err = model.Document().
-		Viewer().
-		Write(ctx, domain.MemberUserset(), doc)
+	err = fluentfga.Write(
+		model.DocumentViewerRelation{}.Tuple(model.DomainMemberUserset{domain}, doc),
+	).Execute(ctx, client)
 	assert.NoError(t, err)
 
-	allowed, err := model.Document().
-		Viewer().
-		Check(ctx, charles, doc)
+	allowed, err := fluentfga.Check(
+		charles,
+		model.DocumentViewerRelation{},
+		doc,
+	).Execute(ctx, client)
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 }

@@ -3,5 +3,8 @@ version: '3'
 tasks:
   examples:
     cmds:
-      - go run ./cmd/fluentfga generate ./examples/gdrive/model.fga ./examples/gdrive/
-      - go run ./cmd/fluentfga generate ./examples/iot/model.fga ./examples/iot/
+      - go run ./cmd/fluentfga generate --clean ./examples/gdrive/model.fga ./examples/gdrive/
+      - go run ./cmd/fluentfga generate --clean ./examples/iot/model.fga ./examples/iot/
+  test:
+    cmds:
+      - go test -v ./...

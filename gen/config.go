@@ -1,4 +1,4 @@
-package fluentfga
+package gen
 
 type Config struct {
 	Package string                `yaml:"package"`

@@ -1,0 +1,71 @@
+{{- /*gotype: github.com/johnrutherford/fluentfga/gen.Model*/ -}}
+
+{{ define "types" }}
+{{ template "_header" . }}
+
+{{ range .Types }}
+// {{ .Type }} represents an object of the "{{ .Name }}" type.
+type {{ .Type }} struct {
+    {{ .IDName }} {{ .IDType }}
+}
+
+func ({{ .Type }}) Provider() fluentfga.ObjectProvider { return objectProvider{} }
+func ({{ .Type }}) FgaType() string { return "{{ .Name }}" }
+func (o {{ .Type }}) Identifier() string { return fmt.Sprint(o.{{ .IDName }}) }
+func (o {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", o.{{ .IDName }}) }
+func ({{ .Type }}) IsFilterable() { }
+
+{{ if .HasWildcard }}
+{{ $wildcardType := print .Type "Wildcard" }}
+// {{ $wildcardType }} represents the "{{ .Name }}:*" wildcard.
+type {{ $wildcardType }} struct{}
+
+func ({{ $wildcardType }}) Provider() fluentfga.ObjectProvider { return objectProvider{} }
+func ({{ $wildcardType }}) FgaType() string { return "{{ .Name }}" }
+func ({{ $wildcardType }}) Identifier() string { return "*" }
+func ({{ $wildcardType }}) String() string { return "{{ .Name }}:*" }
+func ({{ $wildcardType }}) IsWildcard() { }
+
+{{ end }}
+
+{{ range .Usersets }}
+{{ $usersetType := print .Type }}
+// {{ $usersetType }} represents the "{{ .Object.Name }}:{{ print "{" .Object.IDName "}" }}#{{ .Relation }}" userset.
+type {{ $usersetType }} struct {
+    {{ .Object.Type }}
+}
+
+func ({{ $usersetType }}) Provider() fluentfga.ObjectProvider { return objectProvider{} }
+func ({{ $usersetType }}) Relation() string { return "{{ .Relation }}" }
+func (u {{ $usersetType }}) String() string { return fmt.Sprint("{{ .Object.Name }}:", u.Identifier(), "#{{ .Relation }}") }
+func ({{ $usersetType }}) IsUserset() { }
+func ({{ .Type }}) IsFilterable() { }
+
+{{ end }}
+
+{{ end }}
+
+type objectProvider struct {}
+
+func (objectProvider) NewObject(typ, id, rel string) (fluentfga.Object, error) {
+    switch {
+{{- range .Types }}
+{{- range .Usersets }}
+    case typ == "{{ .Object.Name }}" && rel == "{{ .Relation }}":
+        return {{ .Type }}{ {{ .Object.Type }} { {{ .Object.IDName }}: id } }, nil
+{{- end }}
+{{- if .HasWildcard }}
+    case typ == "{{ .Name }}" && id == "*" && rel == "":
+        return {{ .Type }}Wildcard{}, nil
+{{- end }}
+    case typ == "{{ .Name }}" && rel == "":
+        return {{ .Type }}{ {{ .IDName }}: id }, nil
+{{- end }}
+
+    default:
+        // TODO: Custom error type
+        return nil, fmt.Errorf("unknown object type %s %s %s", typ, id, rel)
+    }
+}
+
+{{ end }}

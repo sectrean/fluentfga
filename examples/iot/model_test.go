@@ -1,11 +1,12 @@
-package fga_test
+package model_test
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	fga "github.com/johnrutherford/fluentfga/examples/iot"
+	"github.com/johnrutherford/fluentfga"
+	model "github.com/johnrutherford/fluentfga/examples/iot"
 	sdkclient "github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,19 +26,26 @@ func NewClient() sdkclient.SdkClient {
 
 func Test(t *testing.T) {
 	ctx := context.Background()
-	model := fga.NewAuthorizationModel(NewClient())
+	client := NewClient()
 
-	anne := fga.UserObject{UserID: "anne"}
-	device := fga.DeviceObject{DeviceID: "1"}
+	anne := model.User{ID: "anne"}
+	bob := model.User{ID: "bob"}
+	device := model.Device{ID: "1"}
 
-	err := model.Device().
-		SecurityGuard().
-		Write(ctx, anne, device)
+	err := fluentfga.Write(
+		model.DeviceSecurityGuardRelation{}.Tuple(anne, device),
+	).Execute(ctx, client)
 	assert.NoError(t, err)
 
-	allowed, err := model.Device().
-		LiveVideoViewer().
-		Check(ctx, anne, device)
+	allowed, err := fluentfga.Check(
+		anne,
+		model.DeviceLiveVideoViewerRelation{},
+		device,
+		fluentfga.WithContextualTuples(
+			model.DeviceSecurityGuardRelation{}.Tuple(bob, device),
+		),
+	).Execute(ctx, client)
+
 	assert.True(t, allowed)
 	assert.NoError(t, err)
 }

@@ -1,4 +1,4 @@
-package fluentfga
+package gen
 
 import (
 	"bytes"
@@ -16,11 +16,8 @@ var fileTemplates = []struct {
 	Template string
 	FileName string
 }{
-	{"model", "fga_model_gen.go"},
-	{"types", "fga_types_gen.go"},
 	{"relations", "fga_relations_gen.go"},
-	{"objects", "fga_objects_gen.go"},
-	{"options", "fga_options_gen.go"},
+	{"types", "fga_types_gen.go"},
 }
 
 type Generator struct {

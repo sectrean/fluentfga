@@ -3,14 +3,17 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	proto "github.com/openfga/api/proto/openfga/v1"
 	language "github.com/openfga/language/pkg/go/transformer"
 	"github.com/spf13/cobra"
 
-	"github.com/johnrutherford/fluentfga"
+	"github.com/johnrutherford/fluentfga/gen"
 )
+
+const CleanFlag = "clean"
 
 func NewGenerateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -22,6 +25,8 @@ func NewGenerateCommand() *cobra.Command {
 		RunE:    run,
 	}
 
+	cmd.PersistentFlags().Bool(CleanFlag, false, "clean the output directory before generating code")
+
 	return cmd
 }
 
@@ -29,22 +34,44 @@ func run(cmd *cobra.Command, args []string) error {
 	file := args[0]
 	outDir := args[1]
 
+	const packageName = "model"
+	const filePrefix = "fga"
+
+	config := &gen.Config{
+		Package: packageName,
+	}
+
+	clean, err := cmd.PersistentFlags().GetBool(CleanFlag)
+	if err != nil {
+		return err
+	}
+
 	protoModel, err := readModelFromFile(file)
 	if err != nil {
 		return err
 	}
 
-	generator, err := fluentfga.NewGenerator()
+	if clean {
+		// TODO: Also clean .go.dump files
+		file, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go"))
+		if err != nil {
+			return err
+		}
+		for _, f := range file {
+			err := os.Remove(f)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	generator, err := gen.NewGenerator()
 	if err != nil {
 		return err
 	}
 
-	config := &fluentfga.Config{
-		Package: "fga",
-	}
-
-	model := fluentfga.NewModel(protoModel, config)
-	return generator.Generate(model, fluentfga.NewWriteFS(outDir))
+	model := gen.NewModel(protoModel, config)
+	return generator.Generate(model, gen.NewWriteFS(outDir))
 }
 
 func readModelFromFile(file string) (*proto.AuthorizationModel, error) {
