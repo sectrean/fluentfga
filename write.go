@@ -74,6 +74,14 @@ type WriteRequest struct {
 	options sdkclient.ClientWriteOptions
 }
 
+func (r *WriteRequest) getBody() *sdkclient.ClientWriteRequest {
+	return &r.body
+}
+
+func (r *WriteRequest) getOptions() *sdkclient.ClientWriteOptions {
+	return &r.options
+}
+
 func (r *WriteRequest) Execute(ctx context.Context, c sdkclient.SdkClient) error {
 	_, err := c.Write(ctx).
 		Body(r.body).
@@ -81,4 +89,28 @@ func (r *WriteRequest) Execute(ctx context.Context, c sdkclient.SdkClient) error
 		Execute()
 
 	return err
+}
+
+type writeOption func(*WriteRequest)
+
+func (o writeOption) applyWriteOption(req *WriteRequest) {
+	o(req)
+}
+
+func WithWrites(tuples ...Tuple) WriteOption {
+	return writeOption(func(req *WriteRequest) {
+		body := req.getBody()
+		for _, t := range tuples {
+			body.Writes = append(body.Writes, t.SdkTupleKey())
+		}
+	})
+}
+
+func WithDeletes(tuples ...TupleWithoutCondition) WriteOption {
+	return writeOption(func(req *WriteRequest) {
+		body := req.getBody()
+		for _, t := range tuples {
+			body.Deletes = append(body.Deletes, t.SdkTupleKeyWithoutCondition())
+		}
+	})
 }

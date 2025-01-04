@@ -31,19 +31,22 @@ func Test(t *testing.T) {
 	anne := model.User{ID: "anne"}
 	bob := model.User{ID: "bob"}
 	device := model.Device{ID: "1"}
+	securityGuard := model.DeviceSecurityGuardRelation{}
+	liveVideoViewer := model.DeviceLiveVideoViewerRelation{}
 
 	err := fluentfga.Write(
-		model.DeviceSecurityGuardRelation{}.Tuple(anne, device),
+		securityGuard.NewTuple(anne, device),
 	).Execute(ctx, client)
 	assert.NoError(t, err)
 
 	allowed, err := fluentfga.Check(
 		anne,
-		model.DeviceLiveVideoViewerRelation{},
+		liveVideoViewer,
 		device,
 		fluentfga.WithContextualTuples(
-			model.DeviceSecurityGuardRelation{}.Tuple(bob, device),
+			fluentfga.NewTuple(bob, securityGuard, device),
 		),
+		fluentfga.WithContext(map[string]any{}),
 	).Execute(ctx, client)
 
 	assert.True(t, allowed)

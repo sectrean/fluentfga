@@ -18,6 +18,13 @@ func (o User) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o User) String() string                   { return fmt.Sprint("user:", o.ID) }
 func (User) IsFilterable()                      {}
 
+func newUserObject(id string) (User, error) {
+	o := User{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
+
 // UserWildcard represents the "user:*" wildcard.
 type UserWildcard struct{}
 
@@ -38,6 +45,13 @@ func (o Document) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o Document) String() string                   { return fmt.Sprint("document:", o.ID) }
 func (Document) IsFilterable()                      {}
 
+func newDocumentObject(id string) (Document, error) {
+	o := Document{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
+
 // Domain represents an object of the "domain" type.
 type Domain struct {
 	ID string
@@ -48,6 +62,13 @@ func (Domain) FgaType() string                    { return "domain" }
 func (o Domain) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o Domain) String() string                   { return fmt.Sprint("domain:", o.ID) }
 func (Domain) IsFilterable()                      {}
+
+func newDomainObject(id string) (Domain, error) {
+	o := Domain{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
 
 // DomainMemberUserset represents the "domain:{ID}#member" userset.
 type DomainMemberUserset struct {
@@ -67,13 +88,14 @@ func (objectProvider) NewObject(typ, id, rel string) (fluentfga.Object, error) {
 	case typ == "user" && id == "*" && rel == "":
 		return UserWildcard{}, nil
 	case typ == "user" && rel == "":
-		return User{ID: id}, nil
+		return newUserObject(id)
 	case typ == "document" && rel == "":
-		return Document{ID: id}, nil
+		return newDocumentObject(id)
 	case typ == "domain" && rel == "member":
-		return DomainMemberUserset{Domain{ID: id}}, nil
+		obj, err := newDomainObject(id)
+		return DomainMemberUserset{obj}, err
 	case typ == "domain" && rel == "":
-		return Domain{ID: id}, nil
+		return newDomainObject(id)
 
 	default:
 		// TODO: Custom error type

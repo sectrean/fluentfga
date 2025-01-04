@@ -15,6 +15,13 @@ func (o {{ .Type }}) Identifier() string { return fmt.Sprint(o.{{ .IDName }}) }
 func (o {{ .Type }}) String() string { return fmt.Sprint("{{ .Name }}:", o.{{ .IDName }}) }
 func ({{ .Type }}) IsFilterable() { }
 
+func new{{ .Type }}Object(id string) ({{ .Type }}, error) {
+    o := {{ .Type }}{}
+    _, err := fmt.Sscan(id, &o.{{ .IDName }})
+
+    return o, err
+}
+
 {{ if .HasWildcard }}
 {{ $wildcardType := print .Type "Wildcard" }}
 // {{ $wildcardType }} represents the "{{ .Name }}:*" wildcard.
@@ -52,14 +59,15 @@ func (objectProvider) NewObject(typ, id, rel string) (fluentfga.Object, error) {
 {{- range .Types }}
 {{- range .Usersets }}
     case typ == "{{ .Object.Name }}" && rel == "{{ .Relation }}":
-        return {{ .Type }}{ {{ .Object.Type }} { {{ .Object.IDName }}: id } }, nil
+        obj, err := new{{ .Object.Type }}Object(id)
+        return {{ .Type }}{ obj }, err
 {{- end }}
 {{- if .HasWildcard }}
     case typ == "{{ .Name }}" && id == "*" && rel == "":
         return {{ .Type }}Wildcard{}, nil
 {{- end }}
     case typ == "{{ .Name }}" && rel == "":
-        return {{ .Type }}{ {{ .IDName }}: id }, nil
+        return new{{ .Type }}Object(id)
 {{- end }}
 
     default:

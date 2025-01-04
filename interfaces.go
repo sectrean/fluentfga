@@ -22,28 +22,27 @@ type FilterType interface {
 	IsFilterable()
 }
 
-type relation interface {
-	Relation() string
-}
-
 type Relation[O Object] interface {
 	FgaType() string
 	Relation() string
 	String() string
 
+	// ObjectType does nothing.
+	//
+	// Deprecated: Don't use. It exists only to enforce type constraints.
 	ObjectType(O)
 }
 
-type DirectRelation[U, O Object] interface {
+type DirectRelation[O, U Object] interface {
 	Relation[O]
 
-	UserType(U)
-	Tuple(U, O) Tuple
+	NewTuple(U, O) Tuple
 }
 
 type Userset interface {
 	Object
 
+	Relation() string
 	IsUserset()
 }
 

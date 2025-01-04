@@ -7,13 +7,56 @@ import (
 	sdk "github.com/openfga/go-sdk"
 )
 
+// NewTuple creates a new Tuple with the given user, relation, and object.
+//
+// The user is not type-constrained, so it is up to the caller to ensure that the user is of a valid type
+// for the relation.
+func NewTuple[U Object, R Relation[O], O Object](user U, relation R, object O) TupleWithoutCondition {
+	return tuple{
+		u: user.String(),
+		r: relation.Relation(),
+		o: object.String(),
+	}
+}
+
+type tuple struct {
+	u string
+	r string
+	o string
+	c *sdk.RelationshipCondition
+}
+
+func (t tuple) WithCondition(c Condition) Tuple {
+	cond := c.SdkRelationshipCondition()
+	t.c = &cond
+
+	return t
+}
+
+func (t tuple) SdkTupleKey() sdk.TupleKey {
+	return sdk.TupleKey{
+		User:      t.u,
+		Relation:  t.r,
+		Object:    t.o,
+		Condition: t.c,
+	}
+}
+
+func (t tuple) SdkTupleKeyWithoutCondition() sdk.TupleKeyWithoutCondition {
+	return sdk.TupleKeyWithoutCondition{
+		User:     t.u,
+		Relation: t.r,
+		Object:   t.o,
+	}
+}
+
 func ParseObjects[O Object](objects []string, reg ObjectProvider) ([]O, error) {
 	result := make([]O, 0, len(objects))
 
 	var errs []error
 	for _, objStr := range objects {
-		var typ, id, rel string
-		n, err := fmt.Sscanf(objStr, "%s:%s#%s", &typ, &id, &rel)
+		var typ, id string
+		n, err := fmt.Sscanf(objStr, "%s:%s", &typ, &id)
 		if err != nil {
 			err := fmt.Errorf("invalid object %q: %w", objStr, err)
 			errs = append(errs, err)
@@ -26,7 +69,7 @@ func ParseObjects[O Object](objects []string, reg ObjectProvider) ([]O, error) {
 			continue
 		}
 
-		obj, err := reg.NewObject(typ, id, rel)
+		obj, err := reg.NewObject(typ, id, "")
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -42,7 +85,11 @@ func ParseObjects[O Object](objects []string, reg ObjectProvider) ([]O, error) {
 		result = append(result, o)
 	}
 
-	return result, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return result, fmt.Errorf("parse openfga objects: %w", err)
+	}
+
+	return result, nil
 }
 
 func NewUsers[U Object](users []sdk.User, reg ObjectProvider) ([]U, error) {

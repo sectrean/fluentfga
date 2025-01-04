@@ -40,6 +40,10 @@ func (r *CheckRequest) getBody() *sdkclient.ClientCheckRequest {
 	return &r.body
 }
 
+func (r *CheckRequest) getOptions() *sdkclient.ClientCheckOptions {
+	return &r.options
+}
+
 func (r *CheckRequest) Execute(ctx context.Context, c sdkclient.SdkClient) (bool, error) {
 	res, err := c.Check(ctx).
 		Body(r.body).
@@ -48,3 +52,5 @@ func (r *CheckRequest) Execute(ctx context.Context, c sdkclient.SdkClient) (bool
 
 	return res.GetAllowed(), err
 }
+
+// TODO: Implement BatchCheck

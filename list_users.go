@@ -40,6 +40,7 @@ type ListUsersOption interface {
 
 type listUsersRequestInterface interface {
 	getBody() *sdkclient.ClientListUsersRequest
+	getOptions() *sdkclient.ClientListUsersOptions
 }
 
 type ListUsersRequest[U FilterType] struct {
@@ -50,6 +51,10 @@ type ListUsersRequest[U FilterType] struct {
 
 func (r *ListUsersRequest[U]) getBody() *sdkclient.ClientListUsersRequest {
 	return &r.body
+}
+
+func (r *ListUsersRequest[U]) getOptions() *sdkclient.ClientListUsersOptions {
+	return &r.options
 }
 
 func (r *ListUsersRequest[U]) Execute(ctx context.Context, c sdkclient.SdkClient) ([]U, error) {

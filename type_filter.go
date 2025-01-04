@@ -13,8 +13,8 @@ func (UserTypeFilter[U]) UserTypeFilter() sdk.UserTypeFilter {
 		Type: u.FgaType(),
 	}
 
-	if r, ok := any(u).(relation); ok {
-		rel := r.Relation()
+	if us, ok := any(u).(Userset); ok {
+		rel := us.Relation()
 		filter.Relation = &rel
 	}
 

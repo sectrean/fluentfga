@@ -14,7 +14,6 @@ type {{ $relType }} struct {}
 func ({{ $relType }}) FgaType() string { return "{{ .Object.Name }}" }
 func ({{ $relType }}) Relation() string { return "{{ .Name }}" }
 func ({{ $relType }}) String() string { return "{{ .Object.Name }}#{{ .Name }}" }
-
 func ({{ $relType }}) ObjectType({{ .Object.Type }}) { }
 
 {{ if gt (len .UserTypes) 0 }}
@@ -23,11 +22,8 @@ func ({{ $relType }}) ObjectType({{ .Object.Type }}) { }
 {{ if gt (len .UserTypes) 1 }}
 {{ $relUserType = print .Object.Type .Type "User" }}
 {{ end }}
-
-func ({{ $relType }}) UserType({{ $relUserType }}) { }
-
-func ({{ $relType }}) Tuple(user {{ $relUserType }}, object {{ .Object.Type }}) fluentfga.Tuple {
-    panic("not implemented")
+func (r {{ $relType }}) NewTuple(user {{ $relUserType }}, object {{ .Object.Type }}) fluentfga.Tuple {
+    return fluentfga.NewTuple(user, r, object)
 }
 
 {{ if gt (len .UserTypes) 1 }}

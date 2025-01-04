@@ -33,6 +33,7 @@ type ListObjectsOption interface {
 
 type listObjectsRequestInterface interface {
 	getBody() *sdkclient.ClientListObjectsRequest
+	getOptions() *sdkclient.ClientListObjectsOptions
 }
 
 type ListObjectsRequest[O Object] struct {
@@ -43,6 +44,10 @@ type ListObjectsRequest[O Object] struct {
 
 func (r *ListObjectsRequest[O]) getBody() *sdkclient.ClientListObjectsRequest {
 	return &r.body
+}
+
+func (r *ListObjectsRequest[O]) getOptions() *sdkclient.ClientListObjectsOptions {
+	return &r.options
 }
 
 func (r *ListObjectsRequest[O]) Execute(ctx context.Context, c sdkclient.SdkClient) ([]O, error) {

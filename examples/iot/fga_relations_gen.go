@@ -8,25 +8,21 @@ import (
 // DeviceDeviceRenamerRelation represents the "device#device_renamer" relation.
 type DeviceDeviceRenamerRelation struct{}
 
-func (DeviceDeviceRenamerRelation) FgaType() string  { return "device" }
-func (DeviceDeviceRenamerRelation) Relation() string { return "device_renamer" }
-func (DeviceDeviceRenamerRelation) String() string   { return "device#device_renamer" }
-
+func (DeviceDeviceRenamerRelation) FgaType() string   { return "device" }
+func (DeviceDeviceRenamerRelation) Relation() string  { return "device_renamer" }
+func (DeviceDeviceRenamerRelation) String() string    { return "device#device_renamer" }
 func (DeviceDeviceRenamerRelation) ObjectType(Device) {}
 
 // DeviceItAdminRelation represents the "device#it_admin" relation.
 type DeviceItAdminRelation struct{}
 
-func (DeviceItAdminRelation) FgaType() string  { return "device" }
-func (DeviceItAdminRelation) Relation() string { return "it_admin" }
-func (DeviceItAdminRelation) String() string   { return "device#it_admin" }
-
+func (DeviceItAdminRelation) FgaType() string   { return "device" }
+func (DeviceItAdminRelation) Relation() string  { return "it_admin" }
+func (DeviceItAdminRelation) String() string    { return "device#it_admin" }
 func (DeviceItAdminRelation) ObjectType(Device) {}
 
-func (DeviceItAdminRelation) UserType(DeviceItAdminUser) {}
-
-func (DeviceItAdminRelation) Tuple(user DeviceItAdminUser, object Device) fluentfga.Tuple {
-	panic("not implemented")
+func (r DeviceItAdminRelation) NewTuple(user DeviceItAdminUser, object Device) fluentfga.Tuple {
+	return fluentfga.NewTuple(user, r, object)
 }
 
 // DeviceItAdminUser represents the direct user types for the "device#it_admin" relation.
@@ -45,34 +41,29 @@ func (DeviceGroupItAdminUserset) deviceItAdminUser() {}
 // DeviceLiveVideoViewerRelation represents the "device#live_video_viewer" relation.
 type DeviceLiveVideoViewerRelation struct{}
 
-func (DeviceLiveVideoViewerRelation) FgaType() string  { return "device" }
-func (DeviceLiveVideoViewerRelation) Relation() string { return "live_video_viewer" }
-func (DeviceLiveVideoViewerRelation) String() string   { return "device#live_video_viewer" }
-
+func (DeviceLiveVideoViewerRelation) FgaType() string   { return "device" }
+func (DeviceLiveVideoViewerRelation) Relation() string  { return "live_video_viewer" }
+func (DeviceLiveVideoViewerRelation) String() string    { return "device#live_video_viewer" }
 func (DeviceLiveVideoViewerRelation) ObjectType(Device) {}
 
 // DeviceRecordedVideoViewerRelation represents the "device#recorded_video_viewer" relation.
 type DeviceRecordedVideoViewerRelation struct{}
 
-func (DeviceRecordedVideoViewerRelation) FgaType() string  { return "device" }
-func (DeviceRecordedVideoViewerRelation) Relation() string { return "recorded_video_viewer" }
-func (DeviceRecordedVideoViewerRelation) String() string   { return "device#recorded_video_viewer" }
-
+func (DeviceRecordedVideoViewerRelation) FgaType() string   { return "device" }
+func (DeviceRecordedVideoViewerRelation) Relation() string  { return "recorded_video_viewer" }
+func (DeviceRecordedVideoViewerRelation) String() string    { return "device#recorded_video_viewer" }
 func (DeviceRecordedVideoViewerRelation) ObjectType(Device) {}
 
 // DeviceSecurityGuardRelation represents the "device#security_guard" relation.
 type DeviceSecurityGuardRelation struct{}
 
-func (DeviceSecurityGuardRelation) FgaType() string  { return "device" }
-func (DeviceSecurityGuardRelation) Relation() string { return "security_guard" }
-func (DeviceSecurityGuardRelation) String() string   { return "device#security_guard" }
-
+func (DeviceSecurityGuardRelation) FgaType() string   { return "device" }
+func (DeviceSecurityGuardRelation) Relation() string  { return "security_guard" }
+func (DeviceSecurityGuardRelation) String() string    { return "device#security_guard" }
 func (DeviceSecurityGuardRelation) ObjectType(Device) {}
 
-func (DeviceSecurityGuardRelation) UserType(DeviceSecurityGuardUser) {}
-
-func (DeviceSecurityGuardRelation) Tuple(user DeviceSecurityGuardUser, object Device) fluentfga.Tuple {
-	panic("not implemented")
+func (r DeviceSecurityGuardRelation) NewTuple(user DeviceSecurityGuardUser, object Device) fluentfga.Tuple {
+	return fluentfga.NewTuple(user, r, object)
 }
 
 // DeviceSecurityGuardUser represents the direct user types for the "device#security_guard" relation.
@@ -91,29 +82,23 @@ func (DeviceGroupSecurityGuardUserset) deviceSecurityGuardUser() {}
 // DeviceGroupItAdminRelation represents the "device_group#it_admin" relation.
 type DeviceGroupItAdminRelation struct{}
 
-func (DeviceGroupItAdminRelation) FgaType() string  { return "device_group" }
-func (DeviceGroupItAdminRelation) Relation() string { return "it_admin" }
-func (DeviceGroupItAdminRelation) String() string   { return "device_group#it_admin" }
-
+func (DeviceGroupItAdminRelation) FgaType() string        { return "device_group" }
+func (DeviceGroupItAdminRelation) Relation() string       { return "it_admin" }
+func (DeviceGroupItAdminRelation) String() string         { return "device_group#it_admin" }
 func (DeviceGroupItAdminRelation) ObjectType(DeviceGroup) {}
 
-func (DeviceGroupItAdminRelation) UserType(User) {}
-
-func (DeviceGroupItAdminRelation) Tuple(user User, object DeviceGroup) fluentfga.Tuple {
-	panic("not implemented")
+func (r DeviceGroupItAdminRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
+	return fluentfga.NewTuple(user, r, object)
 }
 
 // DeviceGroupSecurityGuardRelation represents the "device_group#security_guard" relation.
 type DeviceGroupSecurityGuardRelation struct{}
 
-func (DeviceGroupSecurityGuardRelation) FgaType() string  { return "device_group" }
-func (DeviceGroupSecurityGuardRelation) Relation() string { return "security_guard" }
-func (DeviceGroupSecurityGuardRelation) String() string   { return "device_group#security_guard" }
-
+func (DeviceGroupSecurityGuardRelation) FgaType() string        { return "device_group" }
+func (DeviceGroupSecurityGuardRelation) Relation() string       { return "security_guard" }
+func (DeviceGroupSecurityGuardRelation) String() string         { return "device_group#security_guard" }
 func (DeviceGroupSecurityGuardRelation) ObjectType(DeviceGroup) {}
 
-func (DeviceGroupSecurityGuardRelation) UserType(User) {}
-
-func (DeviceGroupSecurityGuardRelation) Tuple(user User, object DeviceGroup) fluentfga.Tuple {
-	panic("not implemented")
+func (r DeviceGroupSecurityGuardRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
+	return fluentfga.NewTuple(user, r, object)
 }

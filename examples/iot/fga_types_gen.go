@@ -18,6 +18,13 @@ func (o User) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o User) String() string                   { return fmt.Sprint("user:", o.ID) }
 func (User) IsFilterable()                      {}
 
+func newUserObject(id string) (User, error) {
+	o := User{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
+
 // Device represents an object of the "device" type.
 type Device struct {
 	ID string
@@ -29,6 +36,13 @@ func (o Device) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o Device) String() string                   { return fmt.Sprint("device:", o.ID) }
 func (Device) IsFilterable()                      {}
 
+func newDeviceObject(id string) (Device, error) {
+	o := Device{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
+
 // DeviceGroup represents an object of the "device_group" type.
 type DeviceGroup struct {
 	ID string
@@ -39,6 +53,13 @@ func (DeviceGroup) FgaType() string                    { return "device_group" }
 func (o DeviceGroup) Identifier() string               { return fmt.Sprint(o.ID) }
 func (o DeviceGroup) String() string                   { return fmt.Sprint("device_group:", o.ID) }
 func (DeviceGroup) IsFilterable()                      {}
+
+func newDeviceGroupObject(id string) (DeviceGroup, error) {
+	o := DeviceGroup{}
+	_, err := fmt.Sscan(id, &o.ID)
+
+	return o, err
+}
 
 // DeviceGroupItAdminUserset represents the "device_group:{ID}#it_admin" userset.
 type DeviceGroupItAdminUserset struct {
@@ -71,15 +92,17 @@ type objectProvider struct{}
 func (objectProvider) NewObject(typ, id, rel string) (fluentfga.Object, error) {
 	switch {
 	case typ == "user" && rel == "":
-		return User{ID: id}, nil
+		return newUserObject(id)
 	case typ == "device" && rel == "":
-		return Device{ID: id}, nil
+		return newDeviceObject(id)
 	case typ == "device_group" && rel == "it_admin":
-		return DeviceGroupItAdminUserset{DeviceGroup{ID: id}}, nil
+		obj, err := newDeviceGroupObject(id)
+		return DeviceGroupItAdminUserset{obj}, err
 	case typ == "device_group" && rel == "security_guard":
-		return DeviceGroupSecurityGuardUserset{DeviceGroup{ID: id}}, nil
+		obj, err := newDeviceGroupObject(id)
+		return DeviceGroupSecurityGuardUserset{obj}, err
 	case typ == "device_group" && rel == "":
-		return DeviceGroup{ID: id}, nil
+		return newDeviceGroupObject(id)
 
 	default:
 		// TODO: Custom error type
