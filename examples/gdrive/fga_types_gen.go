@@ -4,7 +4,7 @@ package model
 import (
 	"fmt"
 
-	fluentfga "github.com/johnrutherford/fluentfga"
+	fluentfga "github.com/sectrean/fluentfga"
 )
 
 // User represents an object of the "user" type.

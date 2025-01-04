@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/johnrutherford/fluentfga"
-	model "github.com/johnrutherford/fluentfga/examples/iot"
 	sdkclient "github.com/openfga/go-sdk/client"
+	"github.com/sectrean/fluentfga"
+	model "github.com/sectrean/fluentfga/examples/iot"
 	"github.com/stretchr/testify/assert"
 )
 

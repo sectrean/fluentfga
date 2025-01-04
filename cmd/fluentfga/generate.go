@@ -10,7 +10,7 @@ import (
 	language "github.com/openfga/language/pkg/go/transformer"
 	"github.com/spf13/cobra"
 
-	"github.com/johnrutherford/fluentfga/gen"
+	"github.com/sectrean/fluentfga/gen"
 )
 
 const CleanFlag = "clean"

@@ -2,7 +2,7 @@
 package model
 
 import (
-	fluentfga "github.com/johnrutherford/fluentfga"
+	fluentfga "github.com/sectrean/fluentfga"
 )
 
 // DocumentCommenterRelation represents the "document#commenter" relation.

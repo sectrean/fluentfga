@@ -1,4 +1,4 @@
-module github.com/johnrutherford/fluentfga
+module github.com/sectrean/fluentfga
 
 go 1.22.3
 
