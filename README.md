@@ -14,26 +14,26 @@ go get github.com/sectrean/fluentfga
 Configure code generation to generate types from your OpenFGA authorization model.
 
 ```go
-//go:generate go run github.com/sectrean/fluentfga/cmd/fluentfga generate --clean model.fga ./
+//go:generate go run github.com/sectrean/fluentfga/cmd/fluentfga generate --clean model.fga ./model/
 ```
 
-# Examples
+# Example
 
 ```go
 var client sdkclient.SdkClient
 
-beth := model.User{ID: "beth"}
+user := model.User{ID: "anne"}
 commenter := model.DocumentCommenterRelation{}
 doc := model.Document{ID: "2021-budget"}
 
 // Write
 err := fluentfga.Write(
-    commenter.NewTuple(beth, doc),
+    commenter.NewTuple(user, doc),
 ).Execute(ctx, client)
 
 // Check
 allowed, err := fluentfga.Check(
-    beth,
+    user,
     commenter,
     doc,
 ).Execute(ctx, client)
@@ -41,7 +41,7 @@ allowed, err := fluentfga.Check(
 // ListObjects
 var docs []model.Document
 docs, err := fluentfga.ListObjects(
-    beth,
+    user,
     commenter,
 ).Execute(ctx, client)
 
@@ -56,7 +56,6 @@ users, err := fluentfga.ListUsers(
 
 # TODO
 
-- Support `fga.mod` and `.json` model files.
 - Implement BulkCheck operation.
 - Implement support for Conditions.
 - Allow customization of generated code:

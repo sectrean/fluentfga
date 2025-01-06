@@ -1,16 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
-	proto "github.com/openfga/api/proto/openfga/v1"
-	language "github.com/openfga/language/pkg/go/transformer"
 	"github.com/spf13/cobra"
 
 	"github.com/sectrean/fluentfga/gen"
+	"github.com/sectrean/fluentfga/internal/model"
 )
 
 const CleanFlag = "clean"
@@ -46,22 +43,15 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	protoModel, err := readModelFromFile(file)
+	protoModel, err := model.ReadModelFromFile(file)
 	if err != nil {
 		return err
 	}
 
 	if clean {
-		// TODO: Also clean .go.dump files
-		file, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go"))
+		err := cleanOutDir(outDir, filePrefix)
 		if err != nil {
 			return err
-		}
-		for _, f := range file {
-			err := os.Remove(f)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -74,15 +64,24 @@ func run(cmd *cobra.Command, args []string) error {
 	return generator.Generate(model, gen.NewWriteFS(outDir))
 }
 
-func readModelFromFile(file string) (*proto.AuthorizationModel, error) {
-	fileBytes, err := os.ReadFile(file)
+func cleanOutDir(outDir string, filePrefix string) error {
+	files, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file %q due to %w", file, err)
+		return err
 	}
 
-	if strings.HasSuffix(file, ".fga") {
-		return language.TransformDSLToProto(string(fileBytes))
-	} else {
-		return nil, fmt.Errorf("unsupported file format")
+	dumpFiles, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go.dump"))
+	if err != nil {
+		return err
 	}
+	files = append(files, dumpFiles...)
+
+	for _, f := range files {
+		err := os.Remove(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
