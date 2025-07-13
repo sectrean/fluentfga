@@ -50,7 +50,7 @@ func (t tuple) SdkTupleKeyWithoutCondition() sdk.TupleKeyWithoutCondition {
 	}
 }
 
-func ParseObjects[O Object](objects []string, reg ObjectProvider) ([]O, error) {
+func ParseObjects[O Object](objects []string, p ObjectProvider) ([]O, error) {
 	result := make([]O, 0, len(objects))
 
 	var errs []error
@@ -69,7 +69,7 @@ func ParseObjects[O Object](objects []string, reg ObjectProvider) ([]O, error) {
 			continue
 		}
 
-		obj, err := reg.NewObject(typ, id, "")
+		obj, err := p.NewObject(typ, id, "")
 		if err != nil {
 			errs = append(errs, err)
 			continue

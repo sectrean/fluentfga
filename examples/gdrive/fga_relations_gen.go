@@ -6,14 +6,16 @@ import (
 )
 
 // DocumentCommenterRelation represents the "document#commenter" relation.
-type DocumentCommenterRelation struct{}
+var DocumentCommenterRelation documentCommenterRelation
 
-func (DocumentCommenterRelation) FgaType() string     { return "document" }
-func (DocumentCommenterRelation) Relation() string    { return "commenter" }
-func (DocumentCommenterRelation) String() string      { return "document#commenter" }
-func (DocumentCommenterRelation) ObjectType(Document) {}
+type documentCommenterRelation struct{}
 
-func (r DocumentCommenterRelation) NewTuple(user DocumentCommenterUser, object Document) fluentfga.Tuple {
+func (documentCommenterRelation) FgaType() string     { return "document" }
+func (documentCommenterRelation) Relation() string    { return "commenter" }
+func (documentCommenterRelation) String() string      { return "document#commenter" }
+func (documentCommenterRelation) ObjectType(Document) {}
+
+func (r documentCommenterRelation) NewTuple(user DocumentCommenterUser, object Document) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -31,14 +33,16 @@ func (User) documentCommenterUser()                {}
 func (DomainMemberUserset) documentCommenterUser() {}
 
 // DocumentOwnerRelation represents the "document#owner" relation.
-type DocumentOwnerRelation struct{}
+var DocumentOwnerRelation documentOwnerRelation
 
-func (DocumentOwnerRelation) FgaType() string     { return "document" }
-func (DocumentOwnerRelation) Relation() string    { return "owner" }
-func (DocumentOwnerRelation) String() string      { return "document#owner" }
-func (DocumentOwnerRelation) ObjectType(Document) {}
+type documentOwnerRelation struct{}
 
-func (r DocumentOwnerRelation) NewTuple(user DocumentOwnerUser, object Document) fluentfga.Tuple {
+func (documentOwnerRelation) FgaType() string     { return "document" }
+func (documentOwnerRelation) Relation() string    { return "owner" }
+func (documentOwnerRelation) String() string      { return "document#owner" }
+func (documentOwnerRelation) ObjectType(Document) {}
+
+func (r documentOwnerRelation) NewTuple(user DocumentOwnerUser, object Document) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -56,26 +60,30 @@ func (User) documentOwnerUser()                {}
 func (DomainMemberUserset) documentOwnerUser() {}
 
 // DocumentParentRelation represents the "document#parent" relation.
-type DocumentParentRelation struct{}
+var DocumentParentRelation documentParentRelation
 
-func (DocumentParentRelation) FgaType() string     { return "document" }
-func (DocumentParentRelation) Relation() string    { return "parent" }
-func (DocumentParentRelation) String() string      { return "document#parent" }
-func (DocumentParentRelation) ObjectType(Document) {}
+type documentParentRelation struct{}
 
-func (r DocumentParentRelation) NewTuple(user Document, object Document) fluentfga.Tuple {
+func (documentParentRelation) FgaType() string     { return "document" }
+func (documentParentRelation) Relation() string    { return "parent" }
+func (documentParentRelation) String() string      { return "document#parent" }
+func (documentParentRelation) ObjectType(Document) {}
+
+func (r documentParentRelation) NewTuple(user Document, object Document) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
 // DocumentViewerRelation represents the "document#viewer" relation.
-type DocumentViewerRelation struct{}
+var DocumentViewerRelation documentViewerRelation
 
-func (DocumentViewerRelation) FgaType() string     { return "document" }
-func (DocumentViewerRelation) Relation() string    { return "viewer" }
-func (DocumentViewerRelation) String() string      { return "document#viewer" }
-func (DocumentViewerRelation) ObjectType(Document) {}
+type documentViewerRelation struct{}
 
-func (r DocumentViewerRelation) NewTuple(user DocumentViewerUser, object Document) fluentfga.Tuple {
+func (documentViewerRelation) FgaType() string     { return "document" }
+func (documentViewerRelation) Relation() string    { return "viewer" }
+func (documentViewerRelation) String() string      { return "document#viewer" }
+func (documentViewerRelation) ObjectType(Document) {}
+
+func (r documentViewerRelation) NewTuple(user DocumentViewerUser, object Document) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -95,14 +103,16 @@ func (UserWildcard) documentViewerUser()        {}
 func (DomainMemberUserset) documentViewerUser() {}
 
 // DocumentWriterRelation represents the "document#writer" relation.
-type DocumentWriterRelation struct{}
+var DocumentWriterRelation documentWriterRelation
 
-func (DocumentWriterRelation) FgaType() string     { return "document" }
-func (DocumentWriterRelation) Relation() string    { return "writer" }
-func (DocumentWriterRelation) String() string      { return "document#writer" }
-func (DocumentWriterRelation) ObjectType(Document) {}
+type documentWriterRelation struct{}
 
-func (r DocumentWriterRelation) NewTuple(user DocumentWriterUser, object Document) fluentfga.Tuple {
+func (documentWriterRelation) FgaType() string     { return "document" }
+func (documentWriterRelation) Relation() string    { return "writer" }
+func (documentWriterRelation) String() string      { return "document#writer" }
+func (documentWriterRelation) ObjectType(Document) {}
+
+func (r documentWriterRelation) NewTuple(user DocumentWriterUser, object Document) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -120,13 +130,15 @@ func (User) documentWriterUser()                {}
 func (DomainMemberUserset) documentWriterUser() {}
 
 // DomainMemberRelation represents the "domain#member" relation.
-type DomainMemberRelation struct{}
+var DomainMemberRelation domainMemberRelation
 
-func (DomainMemberRelation) FgaType() string   { return "domain" }
-func (DomainMemberRelation) Relation() string  { return "member" }
-func (DomainMemberRelation) String() string    { return "domain#member" }
-func (DomainMemberRelation) ObjectType(Domain) {}
+type domainMemberRelation struct{}
 
-func (r DomainMemberRelation) NewTuple(user User, object Domain) fluentfga.Tuple {
+func (domainMemberRelation) FgaType() string   { return "domain" }
+func (domainMemberRelation) Relation() string  { return "member" }
+func (domainMemberRelation) String() string    { return "domain#member" }
+func (domainMemberRelation) ObjectType(Domain) {}
+
+func (r domainMemberRelation) NewTuple(user User, object Domain) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }

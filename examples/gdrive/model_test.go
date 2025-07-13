@@ -40,7 +40,7 @@ func Test_IndividualPermissions(t *testing.T) {
 
 	allowed, err := fluentfga.Check(
 		beth,
-		model.DocumentCommenterRelation{},
+		model.DocumentCommenterRelation,
 		doc,
 	).Execute(ctx, client)
 
@@ -48,14 +48,14 @@ func Test_IndividualPermissions(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = fluentfga.Write(
-		model.DocumentOwnerRelation{}.NewTuple(anne, doc),
+		model.DocumentOwnerRelation.NewTuple(anne, doc),
 	).Execute(ctx, client)
 
 	assert.NoError(t, err)
 
 	allowed, err = fluentfga.Check(
 		anne,
-		model.DocumentOwnerRelation{},
+		model.DocumentOwnerRelation,
 		doc,
 	).Execute(ctx, client)
 
@@ -64,7 +64,7 @@ func Test_IndividualPermissions(t *testing.T) {
 
 	allowed, err = fluentfga.Check(
 		anne,
-		model.DocumentWriterRelation{},
+		model.DocumentWriterRelation,
 		doc,
 	).Execute(ctx, client)
 
@@ -73,7 +73,7 @@ func Test_IndividualPermissions(t *testing.T) {
 
 	users, err := fluentfga.ListUsers(
 		doc,
-		model.DocumentOwnerRelation{},
+		model.DocumentOwnerRelation,
 		fluentfga.UserTypeFilter[model.User]{},
 	).Execute(ctx, client)
 
@@ -89,10 +89,10 @@ func Test_OrganizationPermissions(t *testing.T) {
 	anne := model.User{ID: "anne"}
 	beth := model.User{ID: "beth"}
 	charles := model.User{ID: "charles"}
-	domainMember := model.DomainMemberRelation{}
+	domainMember := model.DomainMemberRelation
 	domain := model.Domain{ID: "xyz"}
 	doc := model.Document{ID: "2021-budget"}
-	documentViewer := model.DocumentViewerRelation{}
+	documentViewer := model.DocumentViewerRelation
 
 	err := fluentfga.Write(
 		fluentfga.NewTuple(anne, domainMember, domain),
@@ -121,7 +121,7 @@ func Test_OrganizationPermissions(t *testing.T) {
 
 	allowed, err := fluentfga.Check(
 		charles,
-		model.DocumentViewerRelation{},
+		model.DocumentViewerRelation,
 		doc,
 	).Execute(ctx, client)
 	assert.True(t, allowed)

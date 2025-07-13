@@ -31,8 +31,8 @@ func Test(t *testing.T) {
 	anne := model.User{ID: "anne"}
 	bob := model.User{ID: "bob"}
 	device := model.Device{ID: "1"}
-	securityGuard := model.DeviceSecurityGuardRelation{}
-	liveVideoViewer := model.DeviceLiveVideoViewerRelation{}
+	securityGuard := model.DeviceSecurityGuardRelation
+	liveVideoViewer := model.DeviceLiveVideoViewerRelation
 
 	err := fluentfga.Write(
 		securityGuard.NewTuple(anne, device),

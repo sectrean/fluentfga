@@ -6,22 +6,26 @@ import (
 )
 
 // DeviceDeviceRenamerRelation represents the "device#device_renamer" relation.
-type DeviceDeviceRenamerRelation struct{}
+var DeviceDeviceRenamerRelation deviceDeviceRenamerRelation
 
-func (DeviceDeviceRenamerRelation) FgaType() string   { return "device" }
-func (DeviceDeviceRenamerRelation) Relation() string  { return "device_renamer" }
-func (DeviceDeviceRenamerRelation) String() string    { return "device#device_renamer" }
-func (DeviceDeviceRenamerRelation) ObjectType(Device) {}
+type deviceDeviceRenamerRelation struct{}
+
+func (deviceDeviceRenamerRelation) FgaType() string   { return "device" }
+func (deviceDeviceRenamerRelation) Relation() string  { return "device_renamer" }
+func (deviceDeviceRenamerRelation) String() string    { return "device#device_renamer" }
+func (deviceDeviceRenamerRelation) ObjectType(Device) {}
 
 // DeviceItAdminRelation represents the "device#it_admin" relation.
-type DeviceItAdminRelation struct{}
+var DeviceItAdminRelation deviceItAdminRelation
 
-func (DeviceItAdminRelation) FgaType() string   { return "device" }
-func (DeviceItAdminRelation) Relation() string  { return "it_admin" }
-func (DeviceItAdminRelation) String() string    { return "device#it_admin" }
-func (DeviceItAdminRelation) ObjectType(Device) {}
+type deviceItAdminRelation struct{}
 
-func (r DeviceItAdminRelation) NewTuple(user DeviceItAdminUser, object Device) fluentfga.Tuple {
+func (deviceItAdminRelation) FgaType() string   { return "device" }
+func (deviceItAdminRelation) Relation() string  { return "it_admin" }
+func (deviceItAdminRelation) String() string    { return "device#it_admin" }
+func (deviceItAdminRelation) ObjectType(Device) {}
+
+func (r deviceItAdminRelation) NewTuple(user DeviceItAdminUser, object Device) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -39,30 +43,36 @@ func (User) deviceItAdminUser()                      {}
 func (DeviceGroupItAdminUserset) deviceItAdminUser() {}
 
 // DeviceLiveVideoViewerRelation represents the "device#live_video_viewer" relation.
-type DeviceLiveVideoViewerRelation struct{}
+var DeviceLiveVideoViewerRelation deviceLiveVideoViewerRelation
 
-func (DeviceLiveVideoViewerRelation) FgaType() string   { return "device" }
-func (DeviceLiveVideoViewerRelation) Relation() string  { return "live_video_viewer" }
-func (DeviceLiveVideoViewerRelation) String() string    { return "device#live_video_viewer" }
-func (DeviceLiveVideoViewerRelation) ObjectType(Device) {}
+type deviceLiveVideoViewerRelation struct{}
+
+func (deviceLiveVideoViewerRelation) FgaType() string   { return "device" }
+func (deviceLiveVideoViewerRelation) Relation() string  { return "live_video_viewer" }
+func (deviceLiveVideoViewerRelation) String() string    { return "device#live_video_viewer" }
+func (deviceLiveVideoViewerRelation) ObjectType(Device) {}
 
 // DeviceRecordedVideoViewerRelation represents the "device#recorded_video_viewer" relation.
-type DeviceRecordedVideoViewerRelation struct{}
+var DeviceRecordedVideoViewerRelation deviceRecordedVideoViewerRelation
 
-func (DeviceRecordedVideoViewerRelation) FgaType() string   { return "device" }
-func (DeviceRecordedVideoViewerRelation) Relation() string  { return "recorded_video_viewer" }
-func (DeviceRecordedVideoViewerRelation) String() string    { return "device#recorded_video_viewer" }
-func (DeviceRecordedVideoViewerRelation) ObjectType(Device) {}
+type deviceRecordedVideoViewerRelation struct{}
+
+func (deviceRecordedVideoViewerRelation) FgaType() string   { return "device" }
+func (deviceRecordedVideoViewerRelation) Relation() string  { return "recorded_video_viewer" }
+func (deviceRecordedVideoViewerRelation) String() string    { return "device#recorded_video_viewer" }
+func (deviceRecordedVideoViewerRelation) ObjectType(Device) {}
 
 // DeviceSecurityGuardRelation represents the "device#security_guard" relation.
-type DeviceSecurityGuardRelation struct{}
+var DeviceSecurityGuardRelation deviceSecurityGuardRelation
 
-func (DeviceSecurityGuardRelation) FgaType() string   { return "device" }
-func (DeviceSecurityGuardRelation) Relation() string  { return "security_guard" }
-func (DeviceSecurityGuardRelation) String() string    { return "device#security_guard" }
-func (DeviceSecurityGuardRelation) ObjectType(Device) {}
+type deviceSecurityGuardRelation struct{}
 
-func (r DeviceSecurityGuardRelation) NewTuple(user DeviceSecurityGuardUser, object Device) fluentfga.Tuple {
+func (deviceSecurityGuardRelation) FgaType() string   { return "device" }
+func (deviceSecurityGuardRelation) Relation() string  { return "security_guard" }
+func (deviceSecurityGuardRelation) String() string    { return "device#security_guard" }
+func (deviceSecurityGuardRelation) ObjectType(Device) {}
+
+func (r deviceSecurityGuardRelation) NewTuple(user DeviceSecurityGuardUser, object Device) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
@@ -80,25 +90,29 @@ func (User) deviceSecurityGuardUser()                            {}
 func (DeviceGroupSecurityGuardUserset) deviceSecurityGuardUser() {}
 
 // DeviceGroupItAdminRelation represents the "device_group#it_admin" relation.
-type DeviceGroupItAdminRelation struct{}
+var DeviceGroupItAdminRelation deviceGroupItAdminRelation
 
-func (DeviceGroupItAdminRelation) FgaType() string        { return "device_group" }
-func (DeviceGroupItAdminRelation) Relation() string       { return "it_admin" }
-func (DeviceGroupItAdminRelation) String() string         { return "device_group#it_admin" }
-func (DeviceGroupItAdminRelation) ObjectType(DeviceGroup) {}
+type deviceGroupItAdminRelation struct{}
 
-func (r DeviceGroupItAdminRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
+func (deviceGroupItAdminRelation) FgaType() string        { return "device_group" }
+func (deviceGroupItAdminRelation) Relation() string       { return "it_admin" }
+func (deviceGroupItAdminRelation) String() string         { return "device_group#it_admin" }
+func (deviceGroupItAdminRelation) ObjectType(DeviceGroup) {}
+
+func (r deviceGroupItAdminRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }
 
 // DeviceGroupSecurityGuardRelation represents the "device_group#security_guard" relation.
-type DeviceGroupSecurityGuardRelation struct{}
+var DeviceGroupSecurityGuardRelation deviceGroupSecurityGuardRelation
 
-func (DeviceGroupSecurityGuardRelation) FgaType() string        { return "device_group" }
-func (DeviceGroupSecurityGuardRelation) Relation() string       { return "security_guard" }
-func (DeviceGroupSecurityGuardRelation) String() string         { return "device_group#security_guard" }
-func (DeviceGroupSecurityGuardRelation) ObjectType(DeviceGroup) {}
+type deviceGroupSecurityGuardRelation struct{}
 
-func (r DeviceGroupSecurityGuardRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
+func (deviceGroupSecurityGuardRelation) FgaType() string        { return "device_group" }
+func (deviceGroupSecurityGuardRelation) Relation() string       { return "security_guard" }
+func (deviceGroupSecurityGuardRelation) String() string         { return "device_group#security_guard" }
+func (deviceGroupSecurityGuardRelation) ObjectType(DeviceGroup) {}
+
+func (r deviceGroupSecurityGuardRelation) NewTuple(user User, object DeviceGroup) fluentfga.Tuple {
 	return fluentfga.NewTuple(user, r, object)
 }

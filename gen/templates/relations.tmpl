@@ -6,9 +6,12 @@
 
 {{ range .Types }}
 {{ range .Relations }}
-{{ $relType := print .Object.Type .Type "Relation" }}
+{{ $relVarName := print .Object.Type .Type "Relation" }}
+{{ $relType := camelCase $relVarName }}
 
-// {{ $relType }} represents the "{{ .Object.Name }}#{{ .Name }}" relation.
+// {{ $relVarName }} represents the "{{ .Object.Name }}#{{ .Name }}" relation.
+var {{ $relVarName }} {{ $relType }}
+
 type {{ $relType }} struct {}
 
 func ({{ $relType }}) FgaType() string { return "{{ .Object.Name }}" }
