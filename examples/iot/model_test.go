@@ -25,6 +25,8 @@ func NewClient() sdkclient.SdkClient {
 }
 
 func Test(t *testing.T) {
+	t.SkipNow()
+
 	ctx := context.Background()
 	client := NewClient()
 

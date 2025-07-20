@@ -2,41 +2,47 @@ package model_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
-	sdkclient "github.com/openfga/go-sdk/client"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	"github.com/sectrean/fluentfga"
 	model "github.com/sectrean/fluentfga/examples/gdrive"
-	"github.com/stretchr/testify/assert"
+	"github.com/sectrean/fluentfga/internal/fgatest"
+	authzmodel "github.com/sectrean/fluentfga/internal/model"
+	"github.com/stretchr/testify/suite"
 )
 
-func NewClient() sdkclient.SdkClient {
-	client, err := sdkclient.NewSdkClient(&sdkclient.ClientConfiguration{
-		ApiUrl:               os.Getenv("FGA_API_URL"),
-		StoreId:              os.Getenv("FGA_STORE_ID"),
-		AuthorizationModelId: os.Getenv("FGA_MODEL_ID"),
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return client
+type ModelSuite struct {
+	fgatest.Suite
+	authzModel *openfgav1.AuthorizationModel
 }
 
-func Test_IndividualPermissions(t *testing.T) {
+func TestModelSuite(t *testing.T) {
+	suite.Run(t, new(ModelSuite))
+}
+
+func (s *ModelSuite) SetupSuite() {
+	s.Suite.SetupSuite()
+
+	authzModel, err := authzmodel.ReadModelFromFile("model.fga")
+	s.Require().NoError(err)
+
+	s.authzModel = authzModel
+}
+
+func (s *ModelSuite) Test_IndividualPermissions() {
 	ctx := context.Background()
-	client := NewClient()
+	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
 
 	beth := model.User{ID: "beth"}
 	anne := model.User{ID: "anne"}
 	doc := model.Document{ID: "2021-budget"}
 
 	err := fluentfga.Write(
-		model.DocumentCommenterRelation{}.NewTuple(beth, doc),
+		model.DocumentCommenterRelation.NewTuple(beth, doc),
 	).Execute(ctx, client)
 
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	allowed, err := fluentfga.Check(
 		beth,
@@ -44,14 +50,14 @@ func Test_IndividualPermissions(t *testing.T) {
 		doc,
 	).Execute(ctx, client)
 
-	assert.True(t, allowed)
-	assert.NoError(t, err)
+	s.True(allowed)
+	s.NoError(err)
 
 	err = fluentfga.Write(
 		model.DocumentOwnerRelation.NewTuple(anne, doc),
 	).Execute(ctx, client)
 
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	allowed, err = fluentfga.Check(
 		anne,
@@ -59,8 +65,8 @@ func Test_IndividualPermissions(t *testing.T) {
 		doc,
 	).Execute(ctx, client)
 
-	assert.True(t, allowed)
-	assert.NoError(t, err)
+	s.True(allowed)
+	s.NoError(err)
 
 	allowed, err = fluentfga.Check(
 		anne,
@@ -68,8 +74,8 @@ func Test_IndividualPermissions(t *testing.T) {
 		doc,
 	).Execute(ctx, client)
 
-	assert.True(t, allowed)
-	assert.NoError(t, err)
+	s.True(allowed)
+	s.NoError(err)
 
 	users, err := fluentfga.ListUsers(
 		doc,
@@ -78,13 +84,13 @@ func Test_IndividualPermissions(t *testing.T) {
 	).Execute(ctx, client)
 
 	// TODO: Check this assertion
-	assert.ElementsMatch(t, []model.User{anne}, users)
-	assert.NoError(t, err)
+	s.ElementsMatch([]model.User{anne}, users)
+	s.NoError(err)
 }
 
-func Test_OrganizationPermissions(t *testing.T) {
+func (s *ModelSuite) Test_OrganizationPermissions() {
 	ctx := context.Background()
-	client := NewClient()
+	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
 
 	anne := model.User{ID: "anne"}
 	beth := model.User{ID: "beth"}
@@ -97,17 +103,17 @@ func Test_OrganizationPermissions(t *testing.T) {
 	err := fluentfga.Write(
 		fluentfga.NewTuple(anne, domainMember, domain),
 	).Execute(ctx, client)
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	err = fluentfga.Write(
 		fluentfga.NewTuple(beth, domainMember, domain),
 	).Execute(ctx, client)
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	err = fluentfga.Write(
 		domainMember.NewTuple(charles, domain),
 	).Execute(ctx, client)
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	err = fluentfga.Write(
 		// fluentfga.NewTuple(
@@ -117,13 +123,14 @@ func Test_OrganizationPermissions(t *testing.T) {
 		// ),
 		documentViewer.NewTuple(model.DomainMemberUserset{domain}, doc),
 	).Execute(ctx, client)
-	assert.NoError(t, err)
+	s.NoError(err)
 
 	allowed, err := fluentfga.Check(
 		charles,
 		model.DocumentViewerRelation,
 		doc,
 	).Execute(ctx, client)
-	assert.True(t, allowed)
-	assert.NoError(t, err)
+
+	s.True(allowed)
+	s.NoError(err)
 }
