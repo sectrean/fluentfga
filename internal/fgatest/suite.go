@@ -8,6 +8,8 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -32,9 +34,19 @@ func (s *Suite) SetupSuite() {
 			Name:         ContainerName,
 			Image:        ContainerImage,
 			ExposedPorts: []string{"8080/tcp"},
+			Tmpfs: map[string]string{
+				"/data": "rw",
+			},
+			Cmd: []string{
+				"run",
+				"--datastore-engine sqlite",
+				"--datastore-uri 'file:/data/openfga.db'",
+			},
+			WaitingFor: wait.ForHealthCheck(),
 		},
 		Started: true,
 		Reuse:   true,
+		Logger:  log.TestLogger(s.T()),
 	})
 	s.Require().NoError(err)
 
