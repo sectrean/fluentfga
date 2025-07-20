@@ -34,15 +34,8 @@ func (s *Suite) SetupSuite() {
 			Name:         ContainerName,
 			Image:        ContainerImage,
 			ExposedPorts: []string{"8080/tcp"},
-			Tmpfs: map[string]string{
-				"/data": "rw",
-			},
-			Cmd: []string{
-				"run",
-				"--datastore-engine sqlite",
-				"--datastore-uri 'file:/data/openfga.db'",
-			},
-			WaitingFor: wait.ForHealthCheck(),
+			Cmd:          []string{"run"},
+			WaitingFor:   wait.ForHealthCheck(),
 		},
 		Started: true,
 		Reuse:   true,
