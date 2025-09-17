@@ -20,6 +20,11 @@ func ListObjects[U, O Object, R Relation[O]](
 		},
 	}
 
+	defaultOpts := []ListObjectsOption{
+		withContextualTuplesFromObjects(user),
+	}
+	opts = append(defaultOpts, opts...)
+
 	for _, opt := range opts {
 		opt.applyListObjectsOption(req)
 	}

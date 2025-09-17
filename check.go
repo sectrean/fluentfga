@@ -20,6 +20,11 @@ func Check[U Object, R Relation[O], O Object](
 		},
 	}
 
+	defaultOpts := []CheckOption{
+		withContextualTuplesFromObjects(user, object),
+	}
+	opts = append(defaultOpts, opts...)
+
 	for _, opt := range opts {
 		opt.applyCheckOption(req)
 	}

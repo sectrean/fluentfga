@@ -5,8 +5,6 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-// TODO: Conditions on contextual tuples
-
 type QueryOption interface {
 	CheckOption
 	ListObjectsOption
@@ -14,6 +12,17 @@ type QueryOption interface {
 }
 
 func WithContextualTuples(tuples ...Tuple) QueryOption {
+	return contextualTuplesOption{tuples}
+}
+
+func withContextualTuplesFromObjects(objects ...Object) QueryOption {
+	var tuples []Tuple
+	for _, obj := range objects {
+		if ct, ok := any(obj).(HasContextualTuples); ok {
+			tuples = append(tuples, ct.ContextualTuples()...)
+		}
+	}
+
 	return contextualTuplesOption{tuples}
 }
 

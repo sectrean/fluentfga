@@ -27,6 +27,11 @@ func ListUsers[O Object, R Relation[O], U Filterable](
 		},
 	}
 
+	defaultOpts := []ListUsersOption{
+		withContextualTuplesFromObjects(object),
+	}
+	opts = append(defaultOpts, opts...)
+
 	for _, opt := range opts {
 		opt.applyListUsersOption(req)
 	}
