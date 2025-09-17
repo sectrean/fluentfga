@@ -116,12 +116,14 @@ func (s *ModelSuite) Test_OrganizationPermissions() {
 	s.NoError(err)
 
 	err = fluentfga.Write(
+		documentViewer.NewTuple(model.DomainMemberUserset{domain}, doc),
+		// Alternate way to create the tuple:
+		//
 		// fluentfga.NewTuple(
 		// 	model.DomainMemberUserset{domain},
 		// 	documentViewer,
 		// 	doc,
 		// ),
-		documentViewer.NewTuple(model.DomainMemberUserset{domain}, doc),
 	).Execute(ctx, client)
 	s.NoError(err)
 
