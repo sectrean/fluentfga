@@ -7,7 +7,7 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-func ListUsers[O Object, R Relation[O], U FilterType](
+func ListUsers[O Object, R Relation[O], U Filterable](
 	object O,
 	relation R,
 	filter UserTypeFilter[U],
@@ -22,7 +22,7 @@ func ListUsers[O Object, R Relation[O], U FilterType](
 			},
 			Relation: relation.Relation(),
 			UserFilters: []sdk.UserTypeFilter{
-				filter.UserTypeFilter(),
+				filter.sdkUserTypeFilter(),
 			},
 		},
 	}
@@ -43,7 +43,7 @@ type listUsersRequestInterface interface {
 	getOptions() *sdkclient.ClientListUsersOptions
 }
 
-type ListUsersRequest[U FilterType] struct {
+type ListUsersRequest[U Filterable] struct {
 	provider ObjectProvider
 	body     sdkclient.ClientListUsersRequest
 	options  sdkclient.ClientListUsersOptions

@@ -4,9 +4,9 @@ import (
 	sdk "github.com/openfga/go-sdk"
 )
 
-type UserTypeFilter[U FilterType] struct{}
+type UserTypeFilter[U Filterable] struct{}
 
-func (UserTypeFilter[U]) UserTypeFilter() sdk.UserTypeFilter {
+func (UserTypeFilter[U]) sdkUserTypeFilter() sdk.UserTypeFilter {
 	var u U
 
 	filter := sdk.UserTypeFilter{

@@ -16,7 +16,7 @@ type ObjectProvider interface {
 	NewObject(typ, id, rel string) (Object, error)
 }
 
-type FilterType interface {
+type Filterable interface {
 	Object
 
 	IsFilterable()
