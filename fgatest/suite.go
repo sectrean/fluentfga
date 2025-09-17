@@ -33,9 +33,12 @@ func (s *Suite) SetupSuite() {
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name:         ContainerName,
 			Image:        ContainerImage,
-			ExposedPorts: []string{"8080/tcp"},
-			Cmd:          []string{"run"},
-			WaitingFor:   wait.ForLog("starting HTTP server"),
+			ExposedPorts: []string{"8080"},
+			Cmd: []string{
+				"run",
+				"--playground-enabled=false",
+			},
+			WaitingFor: wait.ForListeningPort("8080"),
 		},
 		Started: true,
 		Reuse:   true,
@@ -45,8 +48,6 @@ func (s *Suite) SetupSuite() {
 
 	s.apiUrl, err = s.container.PortEndpoint(ctx, "8080", "http")
 	s.Require().NoError(err)
-
-	s.T().Logf("OpenFGA test container API URL: %s", s.apiUrl)
 }
 
 // NewStore creates a new openfga store with the given model and returns an API client.

@@ -2,55 +2,52 @@ package model_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
-	sdkclient "github.com/openfga/go-sdk/client"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	"github.com/sectrean/fluentfga"
 	model "github.com/sectrean/fluentfga/examples/iot"
-	"github.com/stretchr/testify/assert"
+	"github.com/sectrean/fluentfga/fgatest"
+	authzmodel "github.com/sectrean/fluentfga/model"
+	"github.com/stretchr/testify/suite"
 )
 
-func NewClient() sdkclient.SdkClient {
-	client, err := sdkclient.NewSdkClient(&sdkclient.ClientConfiguration{
-		ApiUrl:               os.Getenv("FGA_API_URL"),
-		StoreId:              os.Getenv("FGA_STORE_ID"),
-		AuthorizationModelId: os.Getenv("FGA_MODEL_ID"),
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return client
+type ModelSuite struct {
+	fgatest.Suite
+	authzModel *openfgav1.AuthorizationModel
 }
 
-func Test(t *testing.T) {
-	t.SkipNow()
+func TestModelSuite(t *testing.T) {
+	suite.Run(t, new(ModelSuite))
+}
 
+func (s *ModelSuite) SetupSuite() {
+	s.Suite.SetupSuite()
+
+	authzModel, err := authzmodel.ReadModelFromFile("model.fga")
+	s.Require().NoError(err)
+
+	s.authzModel = authzModel
+}
+
+func (s *ModelSuite) Test_ContextualTuples() {
 	ctx := context.Background()
-	client := NewClient()
+	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
 
 	anne := model.User{ID: "anne"}
-	bob := model.User{ID: "bob"}
-	device := model.Device{ID: "1"}
-	securityGuard := model.DeviceSecurityGuardRelation
-	liveVideoViewer := model.DeviceLiveVideoViewerRelation
+	device := model.Device{
+		ID: "1",
 
-	err := fluentfga.Write(
-		securityGuard.NewTuple(anne, device),
-	).Execute(ctx, client)
-	assert.NoError(t, err)
+		// This will be passed in as a contextual tuple
+		SecurityGuard: anne,
+	}
 
 	allowed, err := fluentfga.Check(
 		anne,
-		liveVideoViewer,
+		model.DeviceLiveVideoViewerRelation{},
 		device,
-		fluentfga.WithContextualTuples(
-			fluentfga.NewTuple(bob, securityGuard, device),
-		),
-		fluentfga.WithContext(map[string]any{}),
 	).Execute(ctx, client)
 
-	assert.True(t, allowed)
-	assert.NoError(t, err)
+	s.True(allowed)
+	s.NoError(err)
 }

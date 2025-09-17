@@ -6,9 +6,9 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-func Check[U Object, R Relation[O], O Object](
+func Check[U, O Object](
 	user U,
-	relation R,
+	relation Relation[O],
 	object O,
 	opts ...CheckOption,
 ) *CheckRequest {
@@ -19,6 +19,12 @@ func Check[U Object, R Relation[O], O Object](
 			Object:   object.String(),
 		},
 	}
+
+	defaultOpts := []CheckOption{
+		withContextualTuplesFromObject(user),
+		withContextualTuplesFromObject(object),
+	}
+	opts = append(defaultOpts, opts...)
 
 	for _, opt := range opts {
 		opt.applyCheckOption(req)

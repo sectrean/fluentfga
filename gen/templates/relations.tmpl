@@ -3,15 +3,11 @@
 {{ define "relations" }}
 {{ template "_header" . }}
 
-
 {{ range .Types }}
 {{ range .Relations }}
-{{ $relVarName := print .Object.Type .Type "Relation" }}
-{{ $relType := camelCase $relVarName }}
+{{ $relType := print .Object.Type .Type "Relation" }}
 
-// {{ $relVarName }} represents the "{{ .Object.Name }}#{{ .Name }}" relation.
-var {{ $relVarName }} {{ $relType }}
-
+// {{ $relType }} represents the "{{ .Object.Name }}#{{ .Name }}" relation.
 type {{ $relType }} struct {}
 
 func ({{ $relType }}) FgaType() string { return "{{ .Object.Name }}" }

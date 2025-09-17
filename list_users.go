@@ -7,9 +7,9 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-func ListUsers[O Object, R Relation[O], U Filterable](
+func ListUsers[O Object, U Filterable](
 	object O,
-	relation R,
+	relation Relation[O],
 	filter UserTypeFilter[U],
 	opts ...ListUsersOption,
 ) *ListUsersRequest[U] {
@@ -26,6 +26,11 @@ func ListUsers[O Object, R Relation[O], U Filterable](
 			},
 		},
 	}
+
+	defaultOpts := []ListUsersOption{
+		withContextualTuplesFromObject(object),
+	}
+	opts = append(defaultOpts, opts...)
 
 	for _, opt := range opts {
 		opt.applyListUsersOption(req)

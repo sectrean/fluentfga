@@ -28,6 +28,11 @@ func newUserObject(id string) (User, error) {
 // Device represents an object of the "device" type.
 type Device struct {
 	ID string
+
+	// Direct Relations
+
+	ItAdmin       DeviceItAdminUser       `fga:"it_admin"`
+	SecurityGuard DeviceSecurityGuardUser `fga:"security_guard"`
 }
 
 func (Device) Provider() fluentfga.ObjectProvider { return objectProvider{} }
@@ -46,6 +51,11 @@ func newDeviceObject(id string) (Device, error) {
 // DeviceGroup represents an object of the "device_group" type.
 type DeviceGroup struct {
 	ID string
+
+	// Direct Relations
+
+	ItAdmin       *User `fga:"it_admin"`
+	SecurityGuard *User `fga:"security_guard"`
 }
 
 func (DeviceGroup) Provider() fluentfga.ObjectProvider { return objectProvider{} }

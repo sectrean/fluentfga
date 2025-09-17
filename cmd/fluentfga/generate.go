@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/sectrean/fluentfga/gen"
-	"github.com/sectrean/fluentfga/internal/model"
+	"github.com/sectrean/fluentfga/model"
 )
 
 const CleanFlag = "clean"

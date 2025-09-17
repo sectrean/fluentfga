@@ -6,9 +6,9 @@ import (
 	sdkclient "github.com/openfga/go-sdk/client"
 )
 
-func ListObjects[U, O Object, R Relation[O]](
+func ListObjects[U, O Object](
 	user U,
-	relation R,
+	relation Relation[O],
 	opts ...ListObjectsOption,
 ) *ListObjectsRequest[O] {
 	req := &ListObjectsRequest[O]{
@@ -19,6 +19,11 @@ func ListObjects[U, O Object, R Relation[O]](
 			Type:     relation.FgaType(),
 		},
 	}
+
+	defaultOpts := []ListObjectsOption{
+		withContextualTuplesFromObject(user),
+	}
+	opts = append(defaultOpts, opts...)
 
 	for _, opt := range opts {
 		opt.applyListObjectsOption(req)
