@@ -5,13 +5,13 @@ import (
 	"text/template"
 )
 
-var TemplateFunctions = template.FuncMap{
-	"abbr":      abbr,
-	"titleCase": titleCase,
-	"camelCase": camelCase,
+var templateFunctions = template.FuncMap{
+	"abbr":      Abbr,
+	"titleCase": TitleCase,
+	"camelCase": CamelCase,
 }
 
-func abbr(name string) string {
+func Abbr(name string) string {
 	if len(name) == 0 {
 		return ""
 	}
@@ -19,7 +19,7 @@ func abbr(name string) string {
 	return strings.ToLower(string(name[0]))
 }
 
-func titleCase(name string) string {
+func TitleCase(name string) string {
 	words := strings.Split(name, "_")
 	titleCased := make([]string, len(words))
 
@@ -32,6 +32,15 @@ func titleCase(name string) string {
 	return strings.Join(titleCased, "")
 }
 
-func camelCase(name string) string {
+func CamelCase(name string) string {
+	name = TitleCase(name)
 	return strings.ToLower(string(name[0])) + name[1:]
+}
+
+func ID(name string) string {
+	return "ID"
+}
+
+func NameID(name string) string {
+	return TitleCase(name) + "ID"
 }

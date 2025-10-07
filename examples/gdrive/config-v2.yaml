@@ -1,0 +1,11 @@
+---
+package: gdrive
+file_prefix: openfga
+types:
+  document:
+    type: Doc
+    id_name: DocID
+  domain:
+    id_name: DomainID
+    id_type: int64
+  
