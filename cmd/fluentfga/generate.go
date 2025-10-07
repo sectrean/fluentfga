@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -31,11 +30,17 @@ func run(cmd *cobra.Command, args []string) error {
 	file := args[0]
 	outDir := args[1]
 
-	const packageName = "model"
-	const filePrefix = "fga"
+	config := gen.NewConfig()
 
-	config := &gen.Config{
-		Package: packageName,
+	configFile, err := cmd.Flags().GetString(ConfigFlag)
+	if err != nil {
+		return err
+	}
+	if configFile != "" {
+		config, err = gen.LoadConfig(configFile)
+		if err != nil {
+			return err
+		}
 	}
 
 	clean, err := cmd.PersistentFlags().GetBool(CleanFlag)
@@ -48,40 +53,23 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	generator, err := gen.NewGenerator(config)
+	if err != nil {
+		return err
+	}
+
+	output, err := os.OpenRoot(outDir)
+	if err != nil {
+		return err
+	}
+
 	if clean {
-		err := cleanOutDir(outDir, filePrefix)
+		err := generator.CleanOutput(output)
 		if err != nil {
 			return err
 		}
-	}
-
-	generator, err := gen.NewGenerator()
-	if err != nil {
-		return err
 	}
 
 	model := gen.NewModel(protoModel, config)
-	return generator.Generate(model, gen.NewWriteFS(outDir))
-}
-
-func cleanOutDir(outDir string, filePrefix string) error {
-	files, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go"))
-	if err != nil {
-		return err
-	}
-
-	dumpFiles, err := filepath.Glob(filepath.Join(outDir, filePrefix+"_*_gen.go.dump"))
-	if err != nil {
-		return err
-	}
-	files = append(files, dumpFiles...)
-
-	for _, f := range files {
-		err := os.Remove(f)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return generator.Generate(model, output)
 }

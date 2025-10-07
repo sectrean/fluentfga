@@ -1,8 +1,6 @@
 module github.com/sectrean/fluentfga
 
-go 1.23.0
-
-toolchain go1.23.3
+go 1.25.0
 
 require (
 	github.com/openfga/api/proto v0.0.0-20240905181937-3583905f61a6
@@ -13,6 +11,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.38.0
 	golang.org/x/tools v0.34.0
 	google.golang.org/protobuf v1.36.6
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -82,5 +81,4 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250528174236-200df99c418a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 	google.golang.org/grpc v1.72.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

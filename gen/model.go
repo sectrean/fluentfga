@@ -69,29 +69,32 @@ func newTypeDefinition(
 	typeDef *proto.TypeDefinition,
 	config *Config,
 ) *TypeDefinition {
-	typ := titleCase(typeDef.Type)
-
-	idName := "ID"
-	idType := "string"
-
-	if typeConfig, ok := config.Types[typeDef.Type]; ok {
-		typ = typeConfig.Type
-		idName = typeConfig.IDName
-		idType = typeConfig.IDType
+	name := typeDef.Type
+	td := &TypeDefinition{
+		Name:   name,
+		Type:   config.FormatTypeName(name),
+		IDName: config.FormatIDName(name),
+		IDType: "string",
 	}
 
-	return &TypeDefinition{
-		Name: typeDef.Type,
-		Type: typ,
-
-		IDName: idName,
-		IDType: idType,
+	if tc, ok := config.Types[typeDef.Type]; ok {
+		if tc.Type != "" {
+			td.Type = tc.Type
+		}
+		if tc.IDName != "" {
+			td.IDName = tc.IDName
+		}
+		if tc.IDType != "" {
+			td.IDType = tc.IDType
+		}
 	}
+
+	return td
 }
 
 func createRelations(
 	model *proto.AuthorizationModel,
-	_ *Config,
+	config *Config,
 	typeMap map[string]*TypeDefinition,
 ) {
 	for _, typeDef := range model.TypeDefinitions {
@@ -103,11 +106,11 @@ func createRelations(
 
 			userTypes := make([]string, 0, len(relMeta.DirectlyRelatedUserTypes))
 			for _, userType := range relMeta.DirectlyRelatedUserTypes {
-				ut := titleCase(userType.Type)
+				ut := config.TypeName(userType.Type)
 				usType := typeMap[userType.Type]
 
 				if rel := userType.GetRelation(); rel != "" {
-					ut += titleCase(rel) + "Userset"
+					ut += config.FormatTypeName(rel) + "Userset"
 					us := &Userset{
 						Type:     ut,
 						Relation: rel,
@@ -115,7 +118,7 @@ func createRelations(
 					}
 					usType.Usersets = append(usType.Usersets, us)
 				} else if rel := userType.GetWildcard(); rel != nil {
-					ut += titleCase(rel.String()) + "Wildcard"
+					ut += config.FormatTypeName(rel.String()) + "Wildcard"
 
 					usType.HasWildcard = true
 				}
@@ -125,7 +128,7 @@ func createRelations(
 
 			rel := &Relation{
 				Name:      name,
-				Type:      titleCase(name),
+				Type:      config.TypeName(name),
 				Object:    td,
 				UserTypes: userTypes,
 			}
