@@ -1,12 +1,16 @@
 package fluentfga
 
-import sdk "github.com/openfga/go-sdk"
+import (
+	sdk "github.com/openfga/go-sdk"
+)
 
 // NewTuple creates a new Tuple with the given user, relation, and object.
 //
 // The user is not type-constrained, so it is up to the caller to ensure that the user is of a valid type
 // for the relation.
-func NewTuple[U Object, R Relation[O], O Object](user U, relation R, object O) TupleWithoutCondition {
+//
+// It's recommended to use [DirectRelation.NewTuple] to ensure type safety.
+func NewTuple[U, O Object](user U, relation Relation[O], object O) TupleWithoutCondition {
 	return tuple{
 		user:     user.String(),
 		relation: relation.Relation(),

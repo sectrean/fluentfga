@@ -1,6 +1,9 @@
 package fluentfga
 
 import (
+	"fmt"
+	"reflect"
+
 	sdk "github.com/openfga/go-sdk"
 	sdkclient "github.com/openfga/go-sdk/client"
 )
@@ -12,18 +15,44 @@ type QueryOption interface {
 }
 
 func WithContextualTuples(tuples ...Tuple) QueryOption {
-	return contextualTuplesOption{tuples}
+	return contextualTuplesOption{Tuples: tuples}
 }
 
-func withContextualTuplesFromObjects(objects ...Object) QueryOption {
+func withContextualTuplesFromObject(obj Object) QueryOption {
+	return contextualTuplesOption{
+		Tuples: contextualTuplesFromObject(obj),
+	}
+}
+
+func contextualTuplesFromObject(obj Object) []Tuple {
+	val := reflect.ValueOf(obj)
+	if val.Kind() == reflect.Pointer {
+		if val.IsNil() {
+			return nil
+		}
+
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return nil
+	}
+
 	var tuples []Tuple
-	for _, obj := range objects {
-		if ct, ok := any(obj).(HasContextualTuples); ok {
-			tuples = append(tuples, ct.ContextualTuples()...)
+	for i := range val.NumField() {
+		fieldVal := val.Field(i)
+		relation := val.Type().Field(i).Tag.Get("fga")
+		if fieldVal.Type().AssignableTo(reflect.TypeFor[Object]()) && !fieldVal.IsNil() {
+			t := tuple{
+				user:     fmt.Sprintf("%s", fieldVal.Interface()),
+				relation: relation,
+				object:   obj.String(),
+			}
+			tuples = append(tuples, t)
 		}
 	}
 
-	return contextualTuplesOption{tuples}
+	return tuples
 }
 
 type contextualTuplesOption struct {
@@ -52,22 +81,22 @@ func (o contextualTuplesOption) applyListUsersOption(req listUsersRequestInterfa
 }
 
 func WithContext(context map[string]any) QueryOption {
-	return checkContextOption{context}
+	return contextOption{context}
 }
 
-type checkContextOption struct {
+type contextOption struct {
 	Context map[string]any
 }
 
-func (o checkContextOption) applyCheckOption(req *CheckRequest) {
+func (o contextOption) applyCheckOption(req *CheckRequest) {
 	req.getBody().Context = &o.Context
 }
 
-func (o checkContextOption) applyListObjectsOption(req listObjectsRequestInterface) {
+func (o contextOption) applyListObjectsOption(req listObjectsRequestInterface) {
 	req.getBody().Context = &o.Context
 }
 
-func (o checkContextOption) applyListUsersOption(req listUsersRequestInterface) {
+func (o contextOption) applyListUsersOption(req listUsersRequestInterface) {
 	req.getBody().Context = &o.Context
 }
 

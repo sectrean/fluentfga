@@ -33,12 +33,12 @@ func (s *Suite) SetupSuite() {
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name:         ContainerName,
 			Image:        ContainerImage,
-			ExposedPorts: []string{"8080/tcp"},
+			ExposedPorts: []string{"8080"},
 			Cmd: []string{
 				"run",
 				"--playground-enabled=false",
 			},
-			WaitingFor: wait.ForExposedPort(),
+			WaitingFor: wait.ForListeningPort("8080"),
 		},
 		Started: true,
 		Reuse:   true,

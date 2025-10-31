@@ -7,6 +7,19 @@
 // {{ .Type }} represents an object of the "{{ .Name }}" type.
 type {{ .Type }} struct {
     {{ .IDName }} {{ .IDType }}
+    {{ if .Relations }}
+
+    // Direct Relations
+    {{ range .Relations }}
+    {{- if gt (len .UserTypes) 0 }}
+    {{- $relUserType := print "*" (index .UserTypes 0) }}
+    {{- if gt (len .UserTypes) 1 }}
+    {{- $relUserType = print .Object.Type .Type "User" }}
+    {{- end }}
+    {{ titleCase .Name }} {{ $relUserType }} `fga:"{{ .Name }}"`
+    {{- end }}
+    {{- end }}
+    {{- end }}
 }
 
 func ({{ .Type }}) Provider() fluentfga.ObjectProvider { return objectProvider{} }

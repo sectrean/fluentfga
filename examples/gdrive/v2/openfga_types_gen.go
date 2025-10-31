@@ -37,6 +37,14 @@ func (UserWildcard) IsWildcard()                        {}
 // Doc represents an object of the "document" type.
 type Doc struct {
 	DocID string
+
+	// Direct Relations
+
+	Commenter DocCommenterUser `fga:"commenter"`
+	Owner     DocOwnerUser     `fga:"owner"`
+	Parent    *Doc             `fga:"parent"`
+	Viewer    DocViewerUser    `fga:"viewer"`
+	Writer    DocWriterUser    `fga:"writer"`
 }
 
 func (Doc) Provider() fluentfga.ObjectProvider { return objectProvider{} }
@@ -55,6 +63,10 @@ func newDocObject(id string) (Doc, error) {
 // Domain represents an object of the "domain" type.
 type Domain struct {
 	DomainID int64
+
+	// Direct Relations
+
+	Member *User `fga:"member"`
 }
 
 func (Domain) Provider() fluentfga.ObjectProvider { return objectProvider{} }

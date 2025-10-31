@@ -67,7 +67,3 @@ type TupleWithoutCondition interface {
 	WithCondition(Condition) Tuple
 	SdkTupleKeyWithoutCondition() sdk.TupleKeyWithoutCondition
 }
-
-type HasContextualTuples interface {
-	ContextualTuples() []Tuple
-}
