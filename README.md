@@ -56,10 +56,5 @@ users, err := fluentfga.ListUsers(
 
 # TODO
 
-- Implement BulkCheck operation.
-- Implement support for Conditions.
-- Allow customization of generated code:
-    - Type names
-    - ID field names
-    - ID field types
-    - Package name
+- Implement BulkCheck operation
+- Implement support for Conditions

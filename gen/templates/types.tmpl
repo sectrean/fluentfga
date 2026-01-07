@@ -8,6 +8,7 @@
 type {{ .Type }} struct {
     {{ .IDName }} {{ .IDType }}
     {{ if .Relations }}
+    {{/* TODO: Make the direct relation generation optional */}}
 
     // Direct Relations
     {{ range .Relations }}
