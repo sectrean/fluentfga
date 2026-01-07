@@ -3,21 +3,21 @@ FluentFGA
 
 Code generation tool for OpenFGA authorization models.
 
-# Install
+## Install
 
 ```shell
 go get github.com/sectrean/fluentfga
 ```
 
-# Usage
+## Usage
 
 Configure code generation to generate types from your OpenFGA authorization model.
 
 ```go
-//go:generate go run github.com/sectrean/fluentfga/cmd/fluentfga generate --clean model.fga ./model/
+//go:generate go run github.com/sectrean/fluentfga/cmd/fluentfga generate model.fga ./model/
 ```
 
-# Example
+## Examples
 
 ```go
 var client sdkclient.SdkClient
@@ -54,7 +54,7 @@ users, err := fluentfga.ListUsers(
 ).Execute(ctx, client)
 ```
 
-# TODO
+## TODO
 
 - Implement BulkCheck operation
 - Implement support for Conditions

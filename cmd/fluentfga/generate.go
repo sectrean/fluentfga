@@ -21,7 +21,7 @@ func NewGenerateCommand() *cobra.Command {
 		RunE:    run,
 	}
 
-	cmd.PersistentFlags().Bool(CleanFlag, false, "clean the output directory before generating code")
+	cmd.PersistentFlags().Bool(CleanFlag, true, "clean the output directory before generating code")
 
 	return cmd
 }
