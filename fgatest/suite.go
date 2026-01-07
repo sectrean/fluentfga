@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ContainerName  = "fluentfga-test"
+	ContainerName  = "fgatest"
 	ContainerImage = "openfga/openfga:latest"
 )
 
@@ -52,7 +52,7 @@ func (s *Suite) SetupSuite() {
 
 // NewStore creates a new openfga store with the given model and returns an API client.
 // It sets the store ID and authorization model ID on the client for further operations.
-func (s *Suite) NewStore(ctx context.Context, name string, model *proto.AuthorizationModel) sdkclient.SdkClient {
+func (s *Suite) NewStore(ctx context.Context, model *proto.AuthorizationModel) sdkclient.SdkClient {
 	modelRequest, err := modelToClientRequest(model)
 	s.Require().NoError(err)
 
@@ -63,7 +63,7 @@ func (s *Suite) NewStore(ctx context.Context, name string, model *proto.Authoriz
 
 	store, err := client.CreateStore(ctx).
 		Body(sdkclient.ClientCreateStoreRequest{
-			Name: name,
+			Name: s.T().Name(),
 		}).
 		Execute()
 	s.Require().NoError(err)
@@ -83,10 +83,7 @@ func (s *Suite) NewStore(ctx context.Context, name string, model *proto.Authoriz
 }
 
 func (s *Suite) TearDownSuite() {
-	ctx := context.Background()
-
-	err := s.container.Terminate(ctx)
-	s.Require().NoError(err)
+	// We will let the reaper terminate the container so it can be re-used by other tests
 }
 
 func modelToClientRequest(model *proto.AuthorizationModel) (sdkclient.ClientWriteAuthorizationModelRequest, error) {

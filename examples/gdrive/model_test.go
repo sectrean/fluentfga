@@ -32,7 +32,7 @@ func (s *ModelSuite) SetupSuite() {
 
 func (s *ModelSuite) Test_IndividualPermissions() {
 	ctx := context.Background()
-	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
+	client := s.NewStore(ctx, s.authzModel)
 
 	beth := model.User{ID: "beth"}
 	anne := model.User{ID: "anne"}
@@ -90,7 +90,7 @@ func (s *ModelSuite) Test_IndividualPermissions() {
 
 func (s *ModelSuite) Test_OrganizationPermissions() {
 	ctx := context.Background()
-	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
+	client := s.NewStore(ctx, s.authzModel)
 
 	anne := model.User{ID: "anne"}
 	beth := model.User{ID: "beth"}
@@ -139,7 +139,7 @@ func (s *ModelSuite) Test_OrganizationPermissions() {
 
 func (s *ModelSuite) Test_ContextualTuples() {
 	ctx := context.Background()
-	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
+	client := s.NewStore(ctx, s.authzModel)
 
 	doc := model.Document{
 		ID: "1234",

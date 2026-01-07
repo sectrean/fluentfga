@@ -32,7 +32,7 @@ func (s *ModelSuite) SetupSuite() {
 
 func (s *ModelSuite) Test_ContextualTuples() {
 	ctx := context.Background()
-	client := s.NewStore(ctx, s.T().Name(), s.authzModel)
+	client := s.NewStore(ctx, s.authzModel)
 
 	anne := model.User{ID: "anne"}
 	device := model.Device{
